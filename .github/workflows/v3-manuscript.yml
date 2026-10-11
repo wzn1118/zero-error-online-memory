@@ -1,0 +1,52 @@
+name: V3 mathematical manuscript
+
+on:
+  push:
+    branches:
+      - research/v3-state-alphabet-gap
+    paths:
+      - v3_state_alphabet/extension.tex
+      - v3_state_alphabet/build_v3.py
+      - v3_state_alphabet/verification/verify_state_deficit.py
+      - .github/workflows/v3-manuscript.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install TeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-extra texlive-fonts-recommended
+      - name: Verify unchanged V2 certificates
+        run: |
+          python3 verify_manifest.py
+          python3 run_all.py --full
+      - name: Check V3 state-alphabet protocols
+        run: python3 v3_state_alphabet/verification/verify_state_deficit.py
+      - name: Build complete V3 paper
+        run: |
+          python3 v3_state_alphabet/build_v3.py
+          pdflatex -jobname=paper -output-directory=v3_state_alphabet -interaction=nonstopmode -halt-on-error v3_state_alphabet/paper.tex
+          pdflatex -jobname=paper -output-directory=v3_state_alphabet -interaction=nonstopmode -halt-on-error v3_state_alphabet/paper.tex
+      - name: Record V3 checksums
+        run: |
+          cd v3_state_alphabet
+          sha256sum paper.tex paper.pdf extension.tex build_v3.py verification/verify_state_deficit.py README.md RELATED_WORK.md CITATION.cff > SHA256SUMS
+          sha256sum -c SHA256SUMS
+      - name: Publish V3 generated article to research branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add v3_state_alphabet/paper.tex v3_state_alphabet/paper.pdf v3_state_alphabet/SHA256SUMS
+          if ! git diff --cached --quiet; then
+            git commit -m "Build V3 state-deficit manuscript and certificates"
+            git push origin HEAD:research/v3-state-alphabet-gap
+          fi

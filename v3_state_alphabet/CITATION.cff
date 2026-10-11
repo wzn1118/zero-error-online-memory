@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "Please cite the appropriate published version."
+title: "Zero-Error Online Memory under Blind Overwrites: State-Alphabet Deficits, Sharp Storage Gaps, and Syndrome Compatibility"
+authors:
+  - family-names: Wang
+    given-names: Zinan
+version: "3.0.0-research"
+date-released: 2026-10-11
+type: article

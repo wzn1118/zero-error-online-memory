@@ -1,0 +1,134 @@
+\section{Exact one-write alphabet saturation and sharp state deficits}\label{sec:v3alphabet}
+
+The integer cardinality of a persistent state alphabet carries information beyond the rounded bit budget. Write $N=2^n$ and let $\kappa_T(n,q)$ be the least alphabet cardinality of a deterministic protocol in the operational model. Thus $R_T^{\rm on}(n,q)=\lceil\log_2\kappa_T(n,q)\rceil$. The following theorems sharpen the bit-saturation results by determining the exact full-alphabet threshold under one write and the asymptotic number of labels saved at the largest erasure budget compatible with an initial collision.
+
+\subsection{Exact full-alphabet threshold}
+
+\begin{theorem}[One-write alphabet saturation]\label{thm:v3threshold}
+For every $n\ge4$ and $1\le q\le n$,
+\[
+ \boxed{\ \kappa_1(n,q)=2^n\quad\Longleftrightarrow\quad q\ge n-1.\ }
+\]
+For $1\le q\le n-2$ an explicit one-write protocol uses at most $2^n-2$ labels.
+\end{theorem}
+\begin{proof}
+If $q\ge n-1$, then $T+q\ge n$. The initial collision lemma makes initialization injective, and storing the entire word attains $N$ labels.
+
+Suppose $q\le n-2$. Take two initial antipodal fibers $P_0=\{0^n,1^n\}$ and $P_1=\{0^{n-1}1,1^{n-1}0\}$ and assign singleton fibers to the other $N-4$ words. Phase zero uses $N-2$ labels. Each antipodal fiber $P=\{x,\bar x\}$ forces the $2n$ phase-one edges
+\[
+ \bigl\{\{U_{i,b}(x),U_{i,b}(\bar x)\}:i\in[n],\ b\in\F\bigr\}.
+\]
+Every such edge has Hamming distance $n-1\ge q+1$. Within a family the edges are distinct: their endpoints agree only at the overwritten coordinate, with common bit $b$. For the two selected source fibers exactly two forced edges coincide, giving $4n-2$ distinct edges. The edge endpoints cover precisely $4n$ vertices when $n\ge4$. Indeed, each family covers the radius-one balls about its antipodal centers; the union of the two families of balls has four overlapping vertices, and the remaining cross-antipodal balls are disjoint.
+
+Assign one terminal label to each forced edge and a singleton terminal label to each of the $N-4n$ remaining words. This uses $(4n-2)+(N-4n)=N-2$ labels. A paired initial label transitions to its forced-edge label; a singleton initial label transitions to any terminal label containing its updated word. The transition receives only the source label and write event. Initial collisions have distance $n$, terminal collisions have distance $n-1$, so recovery of every set of at most $q$ erased coordinates is unique.
+\end{proof}
+
+For $(n,q)=(4,2)$, the $14$-label scheme from Proposition~\ref{prop:fourteen} meets this bound exactly. The next construction gives a state saving of order $2^n/n$ for arbitrary large blocklengths.
+
+\subsection{Antipodal codes as online state machines}
+
+\begin{theorem}[Code-to-protocol transfer]\label{thm:v3transfer}
+Let $n\ge3$. Suppose $C\subseteq\F^n$ has minimum distance at least three and is invariant under complementation $x\mapsto\bar x=x\oplus\mathbf1$. For every $1\le q\le n-2$,
+\[
+ \boxed{\quad\kappa_1(n,q)\le N-\frac{|C|}{2}.\quad}
+\]
+The explicit protocol has $N-|C|/2$ phase-zero labels and $N-|C|$ phase-one labels.
+\end{theorem}
+\begin{proof}
+Partition $C$ into $a=|C|/2$ complementary pairs. Make each pair one initial fiber and each word outside $C$ a singleton fiber. Thus phase zero uses $N-a$ labels.
+
+Each pair $\{c,\bar c\}$ forces $2n$ distinct output edges, all of Hamming distance $n-1$, whose endpoints form the union $B_1(c)\cup B_1(\bar c)$ of radius-one balls. This union contains exactly $2(n+1)$ words because $n\ge3$. The minimum-distance-three assumption makes all radius-one balls centered at different words of $C$ disjoint. Hence all pairs jointly force $2na$ distinct edges covering exactly $2(n+1)a$ terminal words. Assign a distinct label to every forced edge and a singleton terminal label to every word outside those balls. The number of terminal labels is
+\[
+ 2na+N-2(n+1)a=N-2a=N-|C|.
+\]
+Map a paired initial label to its forced edge for the specified write; map a singleton label to a selected terminal fiber containing its updated word. Both initial and terminal fibers have pairwise Hamming distance exceeding $q$. The common label alphabet has size $N-a$.
+\end{proof}
+
+\begin{lemma}[Zero-sum parity-check construction]\label{lem:v3zerosum}
+For every $n\ge3$, put
+\[
+ r=\lceil\log_2(n+24)\rceil,\qquad Q=2^r.
+\]
+There is a deterministic construction of $n$ distinct, nonzero vectors of $\F^r$ having zero XOR. Taking these vectors as the columns of an $r\times n$ matrix $H$ gives an antipodal binary code $C=\ker H$ with minimum distance at least three and $|C|\ge N/Q$.
+\end{lemma}
+\begin{proof}
+Represent $\F^r$ by the integers $0,\ldots,Q-1$ and partition it into the four-element cosets $B_j=\{4j,4j+1,4j+2,4j+3\}$ of the subspace $\{0,1,2,3\}$. Each $B_j$ has zero XOR. For residues of $n$ modulo four choose the initial zero-sum set
+\[
+\begin{array}{c|c|c}
+n\bmod4&S&|S|\\ \hline
+0&\varnothing&0\\
+1&\{1,2,4,8,15\}&5\\
+2&\{1,2,3,4,8,12\}&6\\
+3&\{1,2,3\}&3.
+\end{array}
+\]
+The residue-one and residue-two cases start at $n=5$ and $n=6$. The chosen $S$ avoids the zero vector and intersects at most four cosets $B_j$. Since $Q\ge n+24$, we may append $(n-|S|)/4$ full cosets disjoint from $S$ and $B_0$. The resulting $n$ vectors are distinct, nonzero, and have zero XOR.
+
+The columns of $H$ are distinct and nonzero, so $\ker H$ has no words of weight one or two. Their zero sum gives $H\mathbf1=0$, making the kernel closed under complementation. Rank-nullity gives $|C|=2^{n-\mathrm{rank}(H)}\ge N/Q$.
+\end{proof}
+
+\begin{corollary}[All-length constructive alphabet saving]\label{cor:v3all}
+For every $n\ge4$ and every $1\le q\le n-2$,
+\[
+ \boxed{\qquad 2^n-\kappa_1(n,q)>\frac{2^n}{4(n+24)}.\qquad}
+\]
+The construction admits deterministic polynomial-time encoding and state transitions using binary linear algebra, syndrome lookup, and combinatorial ranking.
+\end{corollary}
+\begin{proof}
+Apply Theorem~\ref{thm:v3transfer} to the kernel of Lemma~\ref{lem:v3zerosum}. The saving is at least $|C|/2\ge N/(2Q)>N/[4(n+24)]$ because $Q<2(n+24)$. Codeword membership and radius-one decoding are computable from the parity-check matrix. The initial pairs and forced-edge labels can be ranked and unranked through linear-system bases and syndrome-class counts.
+\end{proof}
+
+\subsection{A matching-order converse}
+
+\begin{theorem}[Sharp state-deficit order at $q=n-2$]\label{thm:v3deficit}
+For every $n\ge4$,
+\[
+ \boxed{\quad \kappa_1(n,n-2)\ge
+ \left\lceil\frac{n2^n}{n+1}\right\rceil.\quad}
+\]
+With $\Delta_n=2^n-\kappa_1(n,n-2)$, we consequently have
+\[
+ \boxed{\quad \frac{2^n}{4(n+24)}<\Delta_n\le
+ \frac{2^n}{n+1},\qquad \Delta_n=\Theta(2^n/n).\quad}
+\]
+The corresponding optimal bit cost remains exactly $n$.
+\end{theorem}
+\begin{proof}
+Here $T+q=n-1$, so by the initial collision lemma every non-singleton initial fiber consists of an antipodal pair. If there are $a$ such fibers, phase zero needs $N-a$ labels.
+
+A paired fiber creates $2n$ distinct forced output edges of Hamming distance $n-1$. Every terminal edge has a unique coordinate on which its endpoints agree. Reversing the write at that coordinate to a pair of antipodal predecessors gives at most two different predecessor pairs. Thus at least $na$ distinct forced terminal edges occur among all initial paired fibers.
+
+Each terminal label supports at most two distinct attainable words: they must have minimum distance at least $n-1$, and $A(n,n-1)=2$ for $n\ge4$. For $n\ge5$ this follows from the Plotkin bound, and for $n=4$ the three-word case fails by direct Hamming-distance counting. Distinct forced edges demand distinct terminal labels, whence $K\ge na$. Therefore
+\[
+ K\ge\max\{N-a,na\}\ge\frac{nN}{n+1}.
+\]
+The integral lower bound follows by taking the ceiling. Combine it with Corollary~\ref{cor:v3all}; Corollary~\ref{cor:halfdistance} gives the bit optimum.
+\end{proof}
+
+\begin{corollary}[Perfect Hamming-code improvement]\label{cor:v3hamming}
+For $n=2^r-1$ and $r\ge3$, the state saving satisfies
+\[
+ \boxed{\qquad \frac{2^n}{2(n+1)}\le\Delta_n
+ \le\frac{2^n}{n+1}.\qquad}
+\]
+\end{corollary}
+\begin{proof}
+Take the classical Hamming parity-check matrix with each nonzero $r$-bit vector as a column. Its kernel has minimum distance three, dimension $n-r$, and size $N/(n+1)$, with disjoint radius-one balls covering the cube. The sum of all nonzero $r$-vectors is zero for $r\ge2$; hence the code contains $\mathbf1$ and is antipodal. The transfer theorem saves half of the codewords as initial labels. The opposite bound is Theorem~\ref{thm:v3deficit}.
+\end{proof}
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}rrrrr@{}}\toprule
+$n$ & $q$ & lower bound on $\kappa_1$ & explicit upper bound & saved labels\\\midrule
+7&5&112&120&$\ge8$\\
+15&13&30720&31744&$\ge1024$\\
+31&29&$31\cdot2^{26}$&$2^{31}-2^{25}$&$\ge2^{25}$\\\bottomrule
+\end{tabular}
+\caption{One-write integer alphabet bounds for the perfect Hamming family. In every row the minimum bit cost equals $n$.}\label{tab:v3hamming}
+\end{table}
+
+\paragraph{Two complementary extremal parameters.}
+The original logarithmic online--static separation quantifies the increase in the rounded bit budget. The integer deficit $\Delta_n$ determines how far the minimum label alphabet lies below the full cube despite an optimal bit budget of $n$. Its $\Theta(2^n/n)$ order holds at every blocklength. A remaining constant-factor problem is to determine the best leading coefficient in $\Delta_n$, particularly along perfect Hamming lengths where the present bounds differ by a factor of two.
+
+\paragraph{Finite verification.}
+The companion program \path{v3_state_alphabet/verification/verify_state_deficit.py} audits the exact two-pair protocol, the antipodal zero-sum construction, and every legal one-write erasure observation at lengths four through seven. The finite enumerations provide reproducible certificates for the explicit transition functions; the general statements follow from the proofs above.
+
