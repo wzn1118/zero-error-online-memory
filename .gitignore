@@ -1,0 +1,16 @@
+# LaTeX build products
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# Python local artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store

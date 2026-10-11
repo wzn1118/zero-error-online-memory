@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+message: "Please cite the article when using this work."
+title: "Zero-Error Online Memory under Blind Overwrites: Global One-Write Saturation, Sharp Storage Gaps, and Syndrome Compatibility"
+authors:
+  - family-names: Wang
+    given-names: Zinan
+type: article

@@ -1,0 +1,318 @@
+{
+  "atoms_from_16_initial_pair_labels": 160,
+  "candidate_initial_pairs": [
+    {
+      "pair": [
+        0,
+        15
+      ],
+      "single_event": [
+        3,
+        0
+      ]
+    },
+    {
+      "pair": [
+        0,
+        23
+      ],
+      "single_event": [
+        4,
+        0
+      ]
+    },
+    {
+      "pair": [
+        0,
+        27
+      ],
+      "single_event": [
+        1,
+        0
+      ]
+    },
+    {
+      "pair": [
+        0,
+        29
+      ],
+      "single_event": [
+        2,
+        0
+      ]
+    },
+    {
+      "pair": [
+        0,
+        30
+      ],
+      "single_event": [
+        0,
+        0
+      ]
+    },
+    {
+      "pair": [
+        0,
+        31
+      ],
+      "single_event": [
+        0,
+        0
+      ]
+    },
+    {
+      "pair": [
+        1,
+        30
+      ],
+      "single_event": [
+        0,
+        0
+      ]
+    },
+    {
+      "pair": [
+        1,
+        31
+      ],
+      "single_event": [
+        0,
+        0
+      ]
+    },
+    {
+      "pair": [
+        2,
+        25
+      ],
+      "single_event": [
+        1,
+        0
+      ]
+    },
+    {
+      "pair": [
+        3,
+        30
+      ],
+      "single_event": [
+        2,
+        1
+      ]
+    },
+    {
+      "pair": [
+        4,
+        25
+      ],
+      "single_event": [
+        2,
+        0
+      ]
+    },
+    {
+      "pair": [
+        5,
+        30
+      ],
+      "single_event": [
+        1,
+        1
+      ]
+    },
+    {
+      "pair": [
+        6,
+        24
+      ],
+      "single_event": [
+        0,
+        1
+      ]
+    },
+    {
+      "pair": [
+        6,
+        25
+      ],
+      "single_event": [
+        0,
+        1
+      ]
+    },
+    {
+      "pair": [
+        7,
+        8
+      ],
+      "single_event": [
+        3,
+        0
+      ]
+    },
+    {
+      "pair": [
+        7,
+        16
+      ],
+      "single_event": [
+        4,
+        0
+      ]
+    },
+    {
+      "pair": [
+        7,
+        24
+      ],
+      "single_event": [
+        0,
+        1
+      ]
+    },
+    {
+      "pair": [
+        7,
+        25
+      ],
+      "single_event": [
+        0,
+        1
+      ]
+    },
+    {
+      "pair": [
+        7,
+        26
+      ],
+      "single_event": [
+        2,
+        1
+      ]
+    },
+    {
+      "pair": [
+        7,
+        28
+      ],
+      "single_event": [
+        1,
+        1
+      ]
+    },
+    {
+      "pair": [
+        9,
+        30
+      ],
+      "single_event": [
+        4,
+        1
+      ]
+    },
+    {
+      "pair": [
+        14,
+        25
+      ],
+      "single_event": [
+        4,
+        1
+      ]
+    },
+    {
+      "pair": [
+        17,
+        30
+      ],
+      "single_event": [
+        3,
+        1
+      ]
+    },
+    {
+      "pair": [
+        22,
+        25
+      ],
+      "single_event": [
+        3,
+        1
+      ]
+    }
+  ],
+  "candidate_predecessor_pairs": 24,
+  "canonical_terminal_code": [
+    0,
+    7,
+    25,
+    30
+  ],
+  "maximal_q2_fibers": {
+    "antipodal_size_two": 16,
+    "size_four": 120
+  },
+  "maximum_atoms_all_16_labels": 96,
+  "maximum_atoms_per_terminal_label": 6,
+  "six_vertex_cover": [
+    0,
+    1,
+    6,
+    7,
+    25,
+    30
+  ],
+  "size_four_code_orbit": 120,
+  "statement": "R_online(5,1,2)=5; complete n=5 all (T,q) by folding and previous n5-q1 certificate",
+  "static_q2_eight_colors": [
+    [
+      1,
+      14,
+      23,
+      24
+    ],
+    [
+      0,
+      15,
+      22,
+      25
+    ],
+    [
+      3,
+      12,
+      21,
+      26
+    ],
+    [
+      2,
+      13,
+      20,
+      27
+    ],
+    [
+      5,
+      10,
+      19,
+      28
+    ],
+    [
+      4,
+      11,
+      18,
+      29
+    ],
+    [
+      7,
+      8,
+      17,
+      30
+    ],
+    [
+      6,
+      9,
+      16,
+      31
+    ]
+  ]
+}

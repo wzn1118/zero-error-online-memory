@@ -1,0 +1,24 @@
+family,n,T,q,s,k,plotkin_A_upper,pair_capacity_bound,ratio_exceeds_capacity,ratio_log2_lower_cert,static_bit_upper,online_exact,gap_lower
+subsequence,144,12,83,95,2,7,21,True,verified by exact integer cross-multiplication,142,144,2
+subsequence,896,32,479,511,3,15,105,True,verified by exact integer cross-multiplication,893,896,3
+subsequence,4800,80,2479,2559,4,31,465,True,verified by exact integer cross-multiplication,4796,4800,4
+subsequence,23808,192,12095,12287,5,63,1953,True,verified by exact integer cross-multiplication,23803,23808,5
+subsequence,112896,448,56895,57343,6,127,8001,True,verified by exact integer cross-multiplication,112890,112896,6
+all-n,1536,48,975,1023,2,4,6,True,verified by exact integer cross-multiplication,1534,1536,2
+all-n,1537,48,975,1023,2,4,6,True,verified by exact integer cross-multiplication,1535,1537,2
+all-n,1600,48,1017,1065,2,4,6,True,verified by exact integer cross-multiplication,1598,1600,2
+all-n,1900,48,1217,1265,2,4,6,True,verified by exact integer cross-multiplication,1898,1900,2
+all-n,2200,48,1417,1465,2,4,6,True,verified by exact integer cross-multiplication,2198,2200,2
+all-n,3000,48,1951,1999,2,4,6,True,verified by exact integer cross-multiplication,2998,3000,2
+all-n,4000,48,2617,2665,2,4,6,True,verified by exact integer cross-multiplication,3998,4000,2
+all-n,5000,48,3283,3331,2,4,6,True,verified by exact integer cross-multiplication,4998,5000,2
+all-n,6000,48,3951,3999,2,4,6,True,verified by exact integer cross-multiplication,5998,6000,2
+all-n,7500,48,4951,4999,2,4,6,True,verified by exact integer cross-multiplication,7498,7500,2
+all-n,10000,128,5583,5711,3,9,36,True,verified by exact integer cross-multiplication,9997,10000,3
+all-n,12000,128,6727,6855,3,9,36,True,verified by exact integer cross-multiplication,11997,12000,3
+all-n,20000,128,11299,11427,3,8,28,True,verified by exact integer cross-multiplication,19997,20000,3
+all-n,30000,128,17011,17139,3,8,28,True,verified by exact integer cross-multiplication,29997,30000,3
+all-n,50000,320,26343,26663,4,19,171,True,verified by exact integer cross-multiplication,49996,50000,4
+all-n,100000,320,53007,53327,4,17,136,True,verified by exact integer cross-multiplication,99996,100000,4
+all-n,123456,320,65519,65839,4,17,136,True,verified by exact integer cross-multiplication,123452,123456,4
+all-n,1000000,1792,506143,507935,6,82,3321,True,verified by exact integer cross-multiplication,999994,1000000,6
