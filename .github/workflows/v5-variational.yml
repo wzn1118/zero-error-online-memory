@@ -1,0 +1,20 @@
+name: V5 exact alphabet certificates
+
+on:
+  push:
+    branches: [research/v5-exact-alphabet-variational]
+    paths:
+      - v5_exact_alphabets/**
+      - .github/workflows/v5-variational.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify V5 finite exact results
+        run: python3 v5_exact_alphabets/verify_finite.py
