@@ -15,7 +15,7 @@ python verify_manifest.py
 python run_all.py --full
 ```
 
-The full suite checks first-phase state-support incidence, the simplex family, deterministic column completion, general bounds, multiround pair counting, finite classifications, and syndrome-atom compatibility graphs. See `REPRODUCIBILITY.md` for the named checks.
+The full suite checks the exact fourteen-state four-coordinate protocol, first-phase state-support incidence, the simplex family, deterministic column completion, general bounds, multiround pair counting, finite classifications, and syndrome-atom compatibility graphs. See `REPRODUCIBILITY.md` for the named checks.
 
 ## Compile the article
 
@@ -25,3 +25,5 @@ pdflatex -interaction=nonstopmode -halt-on-error paper.tex
 ```
 
 The state model uses a public phase index and charges every persistent state label. Erasure recovery is required at each phase; update transitions receive the current label and coordinate assignment.
+
+The exact fourteen-state optimum for (n,T,q)=(4,1,2) is proved in the article and verified in `verification/verify_n4_14_states.py`.

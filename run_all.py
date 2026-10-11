@@ -10,6 +10,7 @@ parser.add_argument('--full', action='store_true', help='include largest affine 
 args = parser.parse_args()
 checks = [
  ('Global support-incidence and exact one-write simplex', ['verify_global_incidence.py', '--max-k','6']),
+ ('Exact fourteen-state four-coordinate protocol', ['verification/verify_n4_14_states.py']),
  ('Deterministic all-length simplex completion', ['construct_completed_simplex.py']),
  ('General bounds, encoders, and multiround counts', ['verify_core_bounds.py']),
  ('Distance spectrum', ['verification/verify_spectrum.py']),

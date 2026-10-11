@@ -288,10 +288,12 @@ For every $n\ge2$, $T\ge1$, and $q\ge1$ with
 \begin{equation}\label{eq:halfdistance}
  T+q\ge \left\lceil\frac n2\right\rceil+1,
 \end{equation}
-the minimum state-alphabet size and the minimum bit cost are
+the minimum bit cost is
 \[
- \boxed{\quad\kappa_T(n,q)=2^n,\qquad R_T^{\rm on}(n,q)=n.\quad}
+ \boxed{\quad R_T^{\rm on}(n,q)=n.\quad}
 \]
+Equivalently, the minimum state-alphabet cardinality satisfies
+\(2^{n-1}<\kappa_T(n,q)\le 2^n\). If \(T+q\ge n\), then \(\kappa_T(n,q)=2^n\).
 The result holds for every deterministic initial encoder and transition map.
 \end{corollary}
 \begin{proof}
@@ -304,7 +306,24 @@ The ratio $2s/(2s-n)$ decreases in $s$, so its maximum is attained at $s=h+1$. W
  A(n,s)\le\left\lfloor\frac{2s}{2s-n}\right\rfloor
  \le\left\lfloor\frac{2h+4}{3}\right\rfloor\le h+3\le s+1.
 \]
-Theorem~\ref{thm:globalincidence} now gives $K\ge 2^n$. The state consisting of the current full record admits every overwrite and query with $2^n$ labels.
+By $A(n,s)\le s+1$, Theorem~\ref{thm:globalincidence} gives $K\ge (s+1)2^n/(2s+1)>2^{n-1}$. Thus $\lceil\log_2 K\rceil\ge n$. Retaining and updating the current full record uses $2^n$ labels, proving equality for the bit cost.
+\end{proof}
+
+\begin{proposition}[Exact fourteen-state one-overwrite protocol]\label{prop:fourteen}
+For the four-coordinate instance with one blind overwrite and up to two erased coordinates, the exact state-alphabet cardinality and optimal bit cost are
+\[
+  \boxed{\quad\kappa_1(4,2)=14,\qquad R_1^{\rm on}(4,2)=4.\quad}
+\]
+\end{proposition}
+\begin{proof}
+Here $s=3$, $A(4,3)=A(4,4)=2$. Indeed, three length-four words cannot have pairwise Hamming distance at least three: translating one word to $0000$, each of the other two would have weight at least three and their mutual distance would be at most two. The refined bound \eqref{eq:globalincidence-refined}, with $A_0=2$, therefore gives
+\[
+  K\ge \frac{(1+3\cdot2)\,2^4}{2+3\cdot2}=14.
+\]
+
+For the reverse inequality, take two initial fibers $\{0000,1111\}$ and $\{0001,1110\}$, together with twelve singleton fibers. These use fourteen phase-zero labels. For each of the two doubleton fibers and each of the eight overwrite events $(i,b)$, form its unordered pair of updated words. Their union contains exactly fourteen distinct pairs, each at distance three. The first doubleton produces eight pairs covering all words of weights zero, one, three, and four. The second produces eight pairs, with precisely two duplicates from the first collection, and adds the six words of weight two. Consequently the fourteen pairs together cover all sixteen current words.
+
+Use these fourteen pairs as phase-one labels. For an initial doubleton and event $(i,b)$, its entire updated image is exactly one listed pair, determining the successor label. For an initial singleton and event, choose the first listed pair containing its updated word. The resulting transition depends only on the initial label and the assigned coordinate and bit. At phase zero, distinct words sharing a label have distance four; at phase one, distinct words sharing a label have distance three. Therefore erasure recovery of at most two coordinates is unique at both phases. This constructs a valid fourteen-state protocol. The explicit transitions and every decoder observation are checked in \path{verification/verify_n4_14_states.py}.
 \end{proof}
 
 \begin{theorem}[An exact global one-overwrite logarithmic gap]\label{thm:onewritegap}
