@@ -358,7 +358,7 @@ $n$ & $q=n-2$ & $\kappa_1(n,q)$ & $2^n-\kappa_1$ & certificate\\\midrule
 \caption{New exact integer state counts. The finite-size verifier enumerates every antipodal initial-pair selection for $n=4,5$, and checks complete transition/erasure observations for explicit optima at $n=4,5,8$.}\label{tab:v5exact}
 \end{table}
 
-The finite optimization~\eqref{eq:v5variation} also provides a direct route to optimality certificates and a natural combinatorial problem: minimize the exterior overlap functional $\Xi(C)$ over complementary-pair subsets of the Boolean cube. The dyadic extremizers combine a precise source-pair density with collision-free exterior neighborhoods. Other blocklengths admit an integer tradeoff between source-pair density and exterior overlap; the length-five optimum is the smallest instance in which positive overlap appears in an optimal protocol. The independent verifier \path{verification/verify_exact_alphabet.py} implements the integer optimization at $n=4,5$, checks the dyadic formulas, and enumerates the permitted write and erasure observations.
+The finite optimization~\eqref{eq:v5variation} also provides a direct route to optimality certificates and a natural combinatorial problem: minimize the exterior overlap functional $\Xi(C)$ over complementary-pair subsets of the Boolean cube. The dyadic extremizers combine a precise source-pair density with collision-free exterior neighborhoods. Other blocklengths admit an integer tradeoff between source-pair density and exterior overlap; the length-five optimum is the smallest instance in which positive overlap appears in an optimal protocol. The accompanying \path{verification/verify_folded_cube_exception.py} proves the seven-dimensional obstruction by exhaustive closure search, and \path{verification/independent_v10_audit.py} separately enumerates all admissible source-pair comparisons at $n=7,8$. The V12 protocol checker independently enumerates the seven-dimensional write and erasure observations.
 
 
 
@@ -445,7 +445,7 @@ For a set $E$ of at most two exterior exceptional vertices, define the closure o
 
 For $\Xi(C)/2=0$, graph translations let us assume $0\in S$. An exact closed-set search enumerates 7,549 closed sets and 446,992 extensions without finding a valid nine-vertex target. For $\Xi(C)/2=1$, exactly one exterior vertex has two selected neighbors. Translate it to $0$ and use coordinate permutations of the seven-dimensional cube to normalize those neighbors as $1,2$. Forbid the other five neighbors of $0$. This search enumerates 26 closed sets and 1,390 extensions, again without a target.
 
-Finally $\Xi(C)/2=2$ has precisely two possibilities: one exceptional exterior vertex with three selected neighbors, or two exceptional vertices each with two selected neighbors. In the first case translate the exception to $0$ and enumerate the $\binom73=35$ choices of its selected neighbors. In the second, vertex transitivity and distance transitivity of the folded cube permit the two exceptions to be represented by $0$ and one of $1,3,7$, corresponding to distances one, two, and three. For each such position, enumerate all $\binom72^2=441$ choices of their selected-neighbor pairs. In every instance, the remaining neighbors of an exceptional vertex are forbidden and the closure search proceeds exactly as above. The integer-only C++ checker \path{verification/certify_n7_xi2.cpp} and an independent standard-library Python checker \path{verification/certify_n7_xi2.py} exhaust these $35+3\cdot441=1,358$ cases and finds no target, visiting 1,721 closed states overall in these additional searches. The zero- and one-overlap cases are also certified by the standard-library Python program \path{verification/certify_n7_closure.py}. All computations consist of 64-bit masks, bit counts, and finite exhaustive recursion with the monotonicity justification given here. The output and the source code are archived with the manuscript. It follows that $\Xi(C)/2\ge3$ for every nine-pair set $C$. This lower bound is attained by the nine representative source words $8,12,19,23,40,44,51,55,56$ together with their seven-bit complements: direct integer adjacency counting gives $\Xi(C)=6$.
+Finally $\Xi(C)/2=2$ has precisely two possibilities: one exceptional exterior vertex with three selected neighbors, or two exceptional vertices each with two selected neighbors. In the first case translate the exception to $0$ and enumerate the $\binom73=35$ choices of its selected neighbors. In the second, vertex transitivity and distance transitivity of the folded cube permit the two exceptions to be represented by $0$ and one of $1,3,7$, corresponding to distances one, two, and three. For each such position, enumerate all $\binom72^2=441$ choices of their selected-neighbor pairs. In every instance, the remaining neighbors of an exceptional vertex are forbidden and the closure search proceeds exactly as above. The independent Python checker \path{verification/verify_folded_cube_exception.py} exhausts these $35+3\cdot441=1,358$ cases and finds no target, visiting 1,721 closed states over those cases. The same script checks the zero-overlap case (7,549 states; 446,992 extensions) and the one-overlap case (26 states; 1,390 extensions), without calling a SAT solver or importing the V12 CNF implementation. All computations consist of 64-bit masks, bit counts, and finite exhaustive recursion with the monotonicity justification given here. The verified script, its raw output, and the source code are archived with the manuscript. It follows that $\Xi(C)/2\ge3$ for every nine-pair set $C$. This lower bound is attained by the nine representative source words $8,12,19,23,40,44,51,55,56$ together with their seven-bit complements: direct integer adjacency counting gives $\Xi(C)=6$.
 
 
 Finally, if a valid 119-label protocol existed, its paired-source set would need $a\ge9$ from the initial label count. The terminal lower bound $K\ge64+6a+\Xi(C)/2$ forces $a\le9$, hence $a=9$ and $\Xi(C)/2\le1$, contrary to the certificate. Thus $K\ge120$ and the Hamming construction is optimal.
@@ -503,6 +503,54 @@ For an initial pair $P=\{x,y\}$, set
 \]
 Each admissible source pair has distance $n$ or $n-1$. Consequently $\mathcal F(P)$ has exactly $2n$ distinct edges, with terminal distance $n-1$ or $n-2$. Write $D=2na-|\mathcal F(M)|$ for repeated forced-edge occurrences. Also let $e(C)$ count the unordered edges of the ordinary hypercube with both endpoints in $C$.
 
+
+\begin{lemma}[Local classification of common successor pairs]\label{lem:local-bridge}
+Assume $n\ge7$. Let $P,Q$ be disjoint two-element source sets, each of
+Hamming distance at least $n-1$, and let $\mathcal F(P)$ and
+$\mathcal F(Q)$ denote their respective forced one-write successor sets.
+If these sets intersect, there are exactly two ordinary cube edges between
+$P$ and $Q$. Moreover, if both edges have the same coordinate, the
+intersection has at most two elements; if their coordinates differ, the
+intersection has at most one element. No three pairwise disjoint legal
+source pairs can force a common successor pair.
+\end{lemma}
+\begin{proof}
+Let $E=\{u,v\}$ be a common successor pair. Its distance is either
+$n-1$ or $n-2$, because one assignment can eliminate at most one
+mismatch. Every source pair that produces $E$ has to be obtained by
+undoing an assignment at a coordinate where $u$ and $v$ agree.
+
+When $\dist(u,v)=n-1$, the agreement coordinate $i$ is unique. The
+possible source pairs consist of $\{u,v\}$, its translate
+$\{u\oplus e_i,v\oplus e_i\}$, and the two opposite single-endpoint
+reversals $\{u\oplus e_i,v\}$ and $\{u,v\oplus e_i\}$.
+Any subcollection of these pairs with mutually disjoint endpoints has
+size at most two. Two disjoint members occupy opposite sides of the
+coordinate-$i$ four-cycle, and its two cross-pair cube edges both have
+coordinate $i$.
+
+When $\dist(u,v)=n-2$, write $i,j$ for the two agreement coordinates.
+A legal source pair giving $E$ must reverse exactly one endpoint at
+exactly one of $i,j$. The four candidates are
+$\{u\oplus e_i,v\}$, $\{u,v\oplus e_i\}$,
+$\{u\oplus e_j,v\}$ and $\{u,v\oplus e_j\}$.
+All contain either $u$ or $v$, so at most two candidates can be
+pairwise disjoint. For two disjoint candidates, one reverses $u$ and
+the other reverses $v$; the two resulting cross-pair unit edges have
+coordinates $i$ and $j$, possibly equal.
+
+These cases prove the two-edge necessity and exclude triple-disjoint
+predecessors. To count the intersection for fixed disjoint $P,Q$,
+observe that an ordinary cube edge between their endpoints can only
+be made into a common output by assigning its changed coordinate.
+The two necessary cross-pair edges fix the overwritten coordinate
+on each side. If those coordinates agree, only the two possible
+assigned values remain, so there are at most two common outputs.
+If they differ, both final output values are forced by the untouched
+opposite endpoint, leaving at most one common output. This gives the
+claimed bounds on $|\mathcal F(P)\cap\mathcal F(Q)|$.
+\end{proof}
+
 \begin{lemma}[Collision--adjacency inequality]\label{lem:next-collision}
 For $n\ge7$ and source matching $M$ as above,
 \[
@@ -510,13 +558,11 @@ For $n\ge7$ and source matching $M$ as above,
 \]
 \end{lemma}
 \begin{proof}
-First consider two disjoint source pairs $P,Q$, each of length at least $n-1$. Let $e(P,Q)$ be the number of hypercube edges between their endpoints. Each endpoint of $P$ is adjacent to at most one endpoint of $Q$, by the triangle inequality and $\dist(Q)\ge n-1>2$, so $e(P,Q)\le2$. If a terminal forced pair $\{u,v\}$ is produced by both $P$ and $Q$, the two sources must form opposite sides of two hypercube edges. To see this, the output distance is either $n-1$ or $n-2$. At distance $n-1$, the unique agreement coordinate of $u,v$ is necessarily the overwritten coordinate, and the disjoint predecessors occupy opposite vertices of the two coordinate-$i$ edges through $u$ and $v$. At distance $n-2$, the overwritten coordinate is one of the two agreement coordinates. Restoring the source distance $n-1$ changes precisely one output endpoint on that coordinate; since $P$ and $Q$ are disjoint, the two restorations must involve different endpoints, again producing two cross-pair unit edges. Hence $\mathcal F(P)\cap\mathcal F(Q)$ is empty unless $e(P,Q)=2$.
-
-In the latter case the two cross-pair unit edges have coordinates $i,j$ (possibly equal). Any common forced pair must arise by overwriting one of these coordinates. For $i=j$ there are at most two different assigned values, producing at most two common forced pairs. For $i\ne j$, each source may have at most one admissible common image at the two agreement positions (and in any event at most two). Thus
+First consider two disjoint source pairs $P,Q$, each of length at least $n-1$. Lemma~\ref{lem:local-bridge} describes all possible shared successor pairs. Let $e(P,Q)$ be the number of hypercube edges between their endpoints. Each endpoint of $P$ is adjacent to at most one endpoint of $Q$, by the triangle inequality and $\dist(Q)\ge n-1>2$, so $e(P,Q)\le2$. By Lemma~\ref{lem:local-bridge}, a shared forced edge requires two cross-pair unit edges, and the overlap contains at most two forced edges. Hence
 \[
  |\mathcal F(P)\cap\mathcal F(Q)|\le e(P,Q).
 \]
-Every forced edge can arise from at most two source pairs in the matching: its predecessors must be among four candidate edges on its one or two agreement positions, whose maximum disjoint subfamily has size two. Hence
+The same lemma excludes a common forced edge from three pairwise disjoint source pairs. Thus the multiplicity correction contains only pairwise intersections. Consequently
 \[
  D=\sum_{P<Q\in M}|\mathcal F(P)\cap\mathcal F(Q)|
  \le\sum_{P<Q\in M}e(P,Q)\le e(C).
@@ -603,6 +649,27 @@ Total & & & 50282\\\bottomrule
 \caption{Five propositional proof cases for the seven-coordinate exclusion. Each proof is an addition-only DRUP derivation ending in the empty clause; the exact checker validates every added clause by unit propagation.}\label{tab:certcases}
 \end{table}
 
+
+\paragraph{Five-case completeness and formalization boundary.}
+A hypothetical $119$-label protocol necessarily has $a=9$ and
+$e-D+\lceil\Xi/2\rceil\le1$. Since $e-D$ and $\Xi$ are
+nonnegative integers, either $\Xi=0$ (case B) or $e=D$ and
+$\Xi\le2$ (case A). In case B, a first source pair can be
+normalized to $(0,127)$ if all chosen pairs are antipodal, or to
+$(0,63)$ if any pair has distance six. In case A, the closed-ball
+identity gives $e\ge7$ and every positive cross-pair adjacency
+must be offset by a forced-edge collision. As a pair of source pairs
+with exactly one cross-unit edge has no common successor edge, at
+least one pair of source pairs has two shared forced edges.
+The independent orbit enumeration normalizes that pair into exactly
+three pair-pair isometry types, represented by
+$((0,63),(1,62))$, $((0,63),(64,127))$ and
+$((0,127),(1,126))$. The frozen CNF files separately encode the
+remaining choices subject to these representative constraints.
+The correctness of this normalization is a mathematical prerequisite
+to the Boolean UNSAT proof; it is verified by the accompanying
+finite orbit enumerator, not inferred from the DRUP checker.
+
 Each CNF uses source-pair selection variables, exact-nine and disjointness constraints, indicators for selected endpoints, and a Boolean encoding of the required external-neighborhood bounds. The five CNFs are regenerated byte-identically by the supplied source. A separate CDCL implementation generated the addition-only DRUP traces. This certificate design follows the clausal-proof verification methodology of Wetzler, Heule and Hunt~\cite{wetzler2014}; an external LRAT or independently verified checker would provide a further assurance layer~\cite{cruzfilipe2017}. The proof checker parses the original CNF, then checks every added clause using the RUP rule: assuming the negations of its literals must force a conflict under exact Boolean unit propagation. An empty clause completes each refutation. The bundled checker reports the counts in Table~\ref{tab:certcases}; truncating the proof or introducing an unjustified clause is rejected. The cardinality gates were subjected to $2{,}046$ truth-table and unit-propagation tests.
 
 \begin{theorem}[Seven-coordinate optimum; computer-assisted component]\label{thm:seven-computer}
@@ -663,8 +730,61 @@ $n$ & $\lfloor2^{n-1}/n\rfloor$ & $\kappa_1(n,n-2)$ & $\kappa_1(n,n-3)$ & Bits &
 
 
 
-\section{Research positioning and resource accounting}
-The static erasure-recovery problem assigns the same label to words of Hamming distance at least $q+1$, and its alphabet minimum is the chromatic number of the $q$th power of the binary Hamming graph, following the characteristic-graph viewpoint of Witsenhausen~\cite{witsenhausen1976}. The online constraint is stronger: initial color classes must admit consistent successors under every possible overwrite. In our setting a transition sees the stored label and the assigned coordinate and new bit, but has no access to the overwritten bit or an uncharged log. This differs from the communication cost for updating stale distributed storage nodes~\cite{nakkiran2014}, and from codeword-symbol repair/locality objectives in locally repairable codes~\cite{zhang2024}. Exact chromatic-number computations for Hamming graph powers~\cite{kokkala2017} concern a static problem and illuminate why one should not extrapolate a special one-write closed form to unrestricted horizons.
+\section{Related work and contribution boundaries}\label{sec:related-work-expanded}
+
+\paragraph{Zero-error coding with side information.}
+Witsenhausen's zero-error side-information framework relates minimum
+message alphabets to graph colorings~\cite{witsenhausen1976}. In the static
+case of our model, two binary words can share an encoding label precisely
+when their Hamming distance exceeds the erasure budget; the resulting
+chromatic number of a power of the binary cube is the appropriate baseline.
+Exact finite colorings, including Kokkala and \"Osterg\r{a}rd's solution
+for the square of the eight-cube~\cite{kokkala2017}, demonstrate that
+these static invariants need not admit simple uniform formulas. More
+recent graph-entropy formulations of zero-error computation with
+side information further illustrate the breadth of the static
+characteristic-graph approach~\cite{charpenay2024}. Our additional
+constraint is a consistent transition mapping for every specified blind
+coordinate assignment. Thus an initial color class cannot be optimized
+without regard to the labels available after a write.
+
+\paragraph{Causal coding and rewritable storage.}
+Witsenhausen also investigated the structure of finite-horizon real-time
+source coders under causal information constraints~\cite{witsenhausen1979}.
+Ahlswede and Zhang's write-efficient memory model studies data rewriting
+through a transition cost and its associated rate--cost tradeoff
+\cite{ahlswedezhang1989}. These antecedents motivate the distinction
+between constraints on the encoder's information, the number of encoded
+states, and the cost of changing a physical representation. Our model
+charges the cardinality of a persistent state alphabet, makes the
+previously stored source coordinate unavailable to the online transition,
+and supplies the current unerased coordinates to the decoder. It does not
+optimize the Hamming distance between successive physical codewords.
+
+\paragraph{Locally updatable codes and oblivious updates.}
+Chandran, Kanukurthi and Ostrovsky introduced locally updatable and
+locally decodable codes that balance limited codeword modifications and
+recovery locality~\cite{chandran2014}. Nakkiran, Shah and Rashmi derived
+communication bounds and constructions for oblivious updates of stale
+storage nodes~\cite{nakkiran2014}. Both concern changes to encoded
+storage, but the latter counts refresh communication and the former
+counts locality/rewrite operations; neither has the identical one-write,
+zero-error, phase-aware state-alphabet objective studied here.
+
+\paragraph{Specific contributions and their scope.}
+Under the explicit assumption of one blind coordinate assignment, a
+public phase index, and zero-error recovery for all erasure patterns,
+we derive a high-erasure matching normal form and bound the multiplicity
+of forced successor edges by initial hypercube adjacencies. Combining
+these tools with explicit cubical constructions gives the exact
+state-alphabet plateau at the two adjacent erasure budgets $q=n-3$
+and $q=n-2$. The exceptional seven-coordinate lower bound uses an
+exhaustive finite reduction and separately checkable propositional
+refutations. The statement concerns exact \emph{label counts}; the rounded
+optimal bit budget remains $n$ in the stated regime. The analysis does
+not establish a complexity classification for arbitrary update horizons
+or a general coding theorem for all dynamic-storage models.
+
 
 The two costs $\kappa_1$ and $R_1^{\rm on}$ must be distinguished throughout. In particular, the two near-maximal erasure levels require $n$ binary memory places despite a strict reduction in the number of distinct labels. The integer cardinality result therefore measures a fine-grained state-space saving inside a single bit-complexity plateau. Whether the exact saving itself translates into a practical implementation advantage depends on representation and indexing overhead; explicit schemes can rank states without storing a lookup table of exponential size when the structure admits a succinct representation. We do not claim measured systems throughput or energy savings.
 
@@ -679,6 +799,87 @@ This manuscript is a research draft with independently reproducible finite certi
 A single blind overwrite creates constraints on the compatibility of initial state labels and their successors. At maximal nontrivial erasure budget the exact state alphabet admits a finite variational formula over antipodal source subsets. A geometric converse and Hamming-prefix constructions determine its optimum at all blocklengths. The next erasure level has the same closed-form optimum for all $n\ge7$; the seven-coordinate exception is supported by a constructive protocol and independently checkable propositional proof traces. The matching normal form supplies a wider exact optimization framework in the high-erasure regime. The distinction between an integer state alphabet and the rounded bit budget is essential to the resulting plateau phenomenon.
 
 
+
+\appendix
+\section{A finite-reduction proof ledger}\label{app:finite-ledger}
+
+A refutation of a propositional formula establishes the absence of assignments
+satisfying that formula. For the seven-dimensional theorem, the implication
+from a hypothetical short online protocol to a satisfying Boolean assignment
+is independent of the SAT search and is made explicit here.
+
+\begin{proposition}[Complete coverage by the five case families]\label{prop:five-cover}
+If a one-write, four-erasure protocol on $\F^7$ uses at most 119 state
+labels, there exists a set of nine pairwise disjoint initial word pairs,
+each at distance six or seven, whose selection variables satisfy one of
+\texttt{B.antipodal}, \texttt{B.mixed}, \texttt{A.normal},
+\texttt{A.special}, or \texttt{A.antipodal}.
+\end{proposition}
+\begin{proof}
+Lemma~\ref{lem:seven-necessary} yields $a=9$ and
+$e-D+\lceil\Xi/2\rceil\le1$. Because both terms are nonnegative
+integers, either $\Xi=0$ or $e=D$ and $\Xi\le2$. In the former case,
+translate and permute coordinates so that an antipodal selected pair
+is $\{0,127\}$ if all pairs are antipodal, or normalize any selected
+distance-six pair to $\{0,63\}$. These are the two B families.
+
+In the latter case the radius-one neighborhood identity reads
+$|B_1(C)|=144-2e-\Xi\le128$, hence $e\ge8-\Xi/2\ge7$.
+Since internal unit edges in a selected initial pair are impossible,
+$e$ is the sum of cross-pair unit-edge counts. The inequality in
+Lemma~\ref{lem:local-bridge} gives a nonnegative loss
+$e(P,Q)-|\mathcal F(P)\cap\mathcal F(Q)|$ for each two different
+selected pairs. The absence of triple disjoint predecessors implies
+$D=\sum_{P<Q}|\mathcal F(P)\cap\mathcal F(Q)|$.
+Therefore $e=D$ forces each pairwise loss to vanish. Because
+$e\ge7$, some two distinct selected pairs have a cross-unit edge.
+A single cross-unit edge cannot create a common successor by
+Lemma~\ref{lem:local-bridge}, so their cross-edge count equals two,
+and they share two forced successor pairs. In $Q_7$, these strong
+collisions have exactly three isometry orbits; an enumerator checks
+all 512 legal initial pairs, all strong collisions, and all cube
+translations and coordinate permutations, with orbit sizes
+1,344, 224, 224. Their representatives are the three A seeds used
+in the finite encodings. This covers every hypothetical protocol.
+\end{proof}
+
+\paragraph{Boolean encoding map.}
+For an admissible source pair $p$, the primary variable $z_p$ is true
+exactly when $p$ is selected. Exactly-nine cardinality constraints and
+at-most-one-per-endpoint constraints make the selected pairs a matching
+of size nine. The auxiliary $u_v$ is defined bidirectionally by
+$u_v\leftrightarrow\bigvee_{p\ni v}z_p$, hence records membership
+$v\in C$. In a B case, the clauses
+$u_v\lor\neg u_a\lor\neg u_b$ for distinct cube neighbors
+$a,b\in N(v)$ enforce $\Xi(C)=0$.
+
+In an A case, for exterior $v$ define the threshold indicators
+\[
+ t_{v,j}=\neg u_v\wedge\bigl[d_C(v)\ge j\bigr],\qquad j=2,3,4.
+\]
+The gate network enforces each threshold in both directions and allows
+at most two true indicators in total. This is exactly the condition
+$\Xi(C)\le2$: for an exterior vertex with $d_C(v)\le3$ its
+contribution is $d_C(v)-1$, while if $d_C(v)\ge4$ the first three
+indicators already exceed the global budget. The constraints
+$\neg z_p\lor\neg z_q$ for pair-pair combinations with
+$e(p,q)>|\mathcal F(p)\cap\mathcal F(q)|$ encode
+$e-D=0$, because the pairwise losses are nonnegative. Unit clauses
+set the selected symmetry seeds. Thus every putative protocol yields
+an assignment satisfying its normalized instance; a sound UNSAT
+certificate for all five instances excludes such protocols.
+
+\paragraph{Trusted boundary.}
+The finite enumeration of orbit representatives and the direct encoding
+map are part of the mathematical reduction. The DRUP proof checker
+certifies five concrete CNFs, not the reduction itself. In the archive,
+\path{verification/verify_folded_cube_exception.py} independently
+checks the $q=n-2$ folded-cube obstruction, while
+\path{verification/independent_v10_audit.py} checks the local
+forced-edge geometry for $n=7,8$. The certified CNF/DRUP pairs and their
+SHA-256 values are bundled under \texttt{v12\_certificates/}; the complete
+reproduction command is \texttt{bash verify\_all.sh} in that directory.
+
 \begin{thebibliography}{99}\small
 \bibitem{witsenhausen1976} H. S. Witsenhausen, ``The zero-error side information problem and chromatic numbers,'' \emph{IEEE Transactions on Information Theory}, 22(5):592--593, 1976. DOI: 10.1109/TIT.1976.1055607.
 \bibitem{hamming1950} R. W. Hamming, ``Error detecting and error correcting codes,'' \emph{Bell System Technical Journal}, 29(2):147--160, 1950. DOI: 10.1002/j.1538-7305.1950.tb00463.x.
@@ -687,6 +888,12 @@ A single blind overwrite creates constraints on the compatibility of initial sta
 \bibitem{zhang2024} W. Zhang, D. Tang, C. Ying, and Y. Luo, ``Constructions of optimal binary locally repairable codes via intersection subspaces,'' \emph{SCIENCE CHINA Information Sciences}, 67, 162306, 2024. DOI: 10.1007/s11432-023-3863-y.
 \bibitem{macwilliams1977} F. J. MacWilliams and N. J. A. Sloane, \emph{The Theory of Error-Correcting Codes}, North-Holland, 1977.
 \bibitem{wetzler2014} N. Wetzler, M. J. H. Heule, and W. A. Hunt Jr., ``DRAT-trim: Efficient Checking and Trimming Using Expressive Clausal Proofs,'' \emph{SAT 2014}, LNCS 8561, pp. 422--429, DOI: 10.1007/978-3-319-09284-3\_31.
-\bibitem{cruzfilipe2017} L. Cruz-Filipe, M. J. H. Heule, W. A. Hunt, M. Kaufmann, and P. Schneider-Kamp, ``Efficient Certified RAT Verification,'' \emph{CADE/ITP related certified verification research}, arXiv:1612.02353.
+\bibitem{cruzfilipe2017} L. Cruz-Filipe, M. J. H. Heule, W. A. Hunt, M. Kaufmann, and P. Schneider-Kamp, ``Efficient Certified RAT Verification,'' \emph{Automated Deduction--CADE 26}, LNCS 10395, pp. 220--236, 2017. DOI: 10.1007/978-3-319-63046-5\_14.
+% Append missing bibitems to paper.tex's existing thebibliography block.
+\bibitem{witsenhausen1979} H. S. Witsenhausen, ``On the Structure of Real-Time Source Coders,'' \emph{Bell System Technical Journal}, 58(6):1437--1451, 1979. DOI: 10.1002/j.1538-7305.1979.tb02263.x.
+\bibitem{ahlswedezhang1989} R. Ahlswede and Z. Zhang, ``Coding for Write-Efficient Memory,'' \emph{Information and Computation}, 83(1):80--97, 1989. DOI: 10.1016/0890-5401(89)90048-5.
+\bibitem{chandran2014} N. Chandran, B. Kanukurthi, and R. Ostrovsky, ``Locally Updatable and Locally Decodable Codes,'' \emph{Theory of Cryptography Conference (TCC)}, 2014, pp. 489--514. DOI: 10.1007/978-3-642-54242-8\_21.
+\bibitem{charpenay2024} N. Charpenay, M. Le Treust, and A. Roumy, ``Side Information Design in Zero-Error Coding for Computing,'' \emph{Entropy}, 26(4):338, 2024. DOI: 10.3390/e26040338.
+
 \end{thebibliography}
 \end{document}
