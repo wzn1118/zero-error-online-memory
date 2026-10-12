@@ -1,0 +1,27 @@
+\begin{lemma}[Local geometry of repeated successors]\label{lem:local-reversal}
+Fix a terminal forced pair $F=\{u,v\}$, and assume that each
+predecessor source pair has Hamming distance at least $n-1$.
+Then $d_{\rm H}(u,v)$ equals $n-1$ or $n-2$, and at most two
+pairwise vertex-disjoint source pairs can force $F$.
+\end{lemma}
+\begin{proof}
+For terminal distance $n-1$, the updated words have one agreement
+coordinate, which must be the overwritten position. Its two original
+bits can be chosen independently. The four possible predecessor
+pairs form the edges of a four-cycle on the four possible original
+endpoints; a vertex-disjoint subfamily has size at most two.
+For terminal distance $n-2$, the update must use one of the two
+agreement coordinates, restoring a source distance of $n-1$ by
+changing exactly one endpoint. There are two choices of coordinate
+and two choices of endpoint. The four possible predecessor pairs
+again form a four-cycle under endpoint incidence, with matching
+number two. Thus no three disjoint pairs in an initial matching
+can force the same successor.
+\end{proof}
+\begin{remark}[Independent finite geometric audit]
+The companion \path{verification/audit_v10_pair_geometry.py}
+enumerates all disjoint eligible source-pair combinations for $n=7,8$,
+checks $|\mathcal F(P)\cap\mathcal F(Q)|\le e(P,Q)$, and excludes
+triple-disjoint predecessor collisions. These finite tests complement
+the dimension-independent case analysis above.
+\end{remark}

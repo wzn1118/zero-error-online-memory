@@ -1,0 +1,24 @@
+\paragraph{Mathematical-to-CNF correspondence.}
+Write $\mathcal P$ for the 512 source pairs of Hamming distance six
+or seven, and let $x_P$ mean that $P\in\mathcal P$ is selected.
+The generator uses $\sum_Px_P=9$ and the endpoint-disjointness
+constraints $\sum_{P\ni z}x_P\le1$ for each word $z$. An auxiliary
+indicator $u_z$ satisfies the full equivalence
+$u_z\leftrightarrow\bigvee_{P\ni z}x_P$.
+For type B, each exterior vertex $z$ and distinct neighbors $y,y'$
+satisfy $u_z\lor\neg u_y\lor\neg u_{y'}$, exactly requiring
+$\Xi(C)=0$. For type A, every pair of source pairs with
+$e(P,Q)>|\mathcal F(P)\cap\mathcal F(Q)|$ is forbidden jointly,
+which enforces $e(C)=D$ using the two-predecessor lemma.
+Type A further constrains
+\[
+\sum_{z\notin C}\sum_{j=2}^{4}\mathbf1_{\{d_C(z)\ge j\}}\le2.
+\]
+The truncation at $j=4$ is exact for the threshold two:
+any exterior degree at least four already contributes at least three.
+Positive unit clauses impose the fixed pair or pair-pair orbit
+representatives. The auxiliary Tseitin gates encode both directions,
+so a satisfying CNF assignment projects to an eligible matching
+satisfying the named necessary conditions. Exhaustiveness of the
+five representatives follows from the mathematical orbit argument,
+which remains a separate proof obligation from clause checking.

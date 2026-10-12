@@ -1,0 +1,56 @@
+% Proposed author-reviewed replacement for the short Research Positioning section.
+% Insert corresponding bibliography items from REFERENCES_TO_ADD.tex.
+\section{Related work and contribution boundaries}\label{sec:related-work-expanded}
+
+\paragraph{Zero-error coding with side information.}
+Witsenhausen's zero-error side-information framework relates minimum
+message alphabets to graph colorings~\cite{witsenhausen1976}. In the static
+case of our model, two binary words can share an encoding label precisely
+when their Hamming distance exceeds the erasure budget; the resulting
+chromatic number of a power of the binary cube is the appropriate baseline.
+Exact finite colorings, including Kokkala and \"Osterg\r{a}rd's solution
+for the square of the eight-cube~\cite{kokkala2017}, demonstrate that
+these static invariants need not admit simple uniform formulas. More
+recent graph-entropy formulations of zero-error computation with
+side information further illustrate the breadth of the static
+characteristic-graph approach~\cite{charpenay2024}. Our additional
+constraint is a consistent transition mapping for every specified blind
+coordinate assignment. Thus an initial color class cannot be optimized
+without regard to the labels available after a write.
+
+\paragraph{Causal coding and rewritable storage.}
+Witsenhausen also investigated the structure of finite-horizon real-time
+source coders under causal information constraints~\cite{witsenhausen1979}.
+Ahlswede and Zhang's write-efficient memory model studies data rewriting
+through a transition cost and its associated rate--cost tradeoff
+\cite{ahlswedezhang1989}. These antecedents motivate the distinction
+between constraints on the encoder's information, the number of encoded
+states, and the cost of changing a physical representation. Our model
+charges the cardinality of a persistent state alphabet, makes the
+previously stored source coordinate unavailable to the online transition,
+and supplies the current unerased coordinates to the decoder. It does not
+optimize the Hamming distance between successive physical codewords.
+
+\paragraph{Locally updatable codes and oblivious updates.}
+Chandran, Kanukurthi and Ostrovsky introduced locally updatable and
+locally decodable codes that balance limited codeword modifications and
+recovery locality~\cite{chandran2014}. Nakkiran, Shah and Rashmi derived
+communication bounds and constructions for oblivious updates of stale
+storage nodes~\cite{nakkiran2014}. Both concern changes to encoded
+storage, but the latter counts refresh communication and the former
+counts locality/rewrite operations; neither has the identical one-write,
+zero-error, phase-aware state-alphabet objective studied here.
+
+\paragraph{Specific contributions and their scope.}
+Under the explicit assumption of one blind coordinate assignment, a
+public phase index, and zero-error recovery for all erasure patterns,
+we derive a high-erasure matching normal form and bound the multiplicity
+of forced successor edges by initial hypercube adjacencies. Combining
+these tools with explicit cubical constructions gives the exact
+state-alphabet plateau at the two adjacent erasure budgets $q=n-3$
+and $q=n-2$. The exceptional seven-coordinate lower bound uses an
+exhaustive finite reduction and separately checkable propositional
+refutations. The statement concerns exact \emph{label counts}; the rounded
+optimal bit budget remains $n$ in the stated regime. The analysis does
+not establish a complexity classification for arbitrary update horizons
+or a general coding theorem for all dynamic-storage models.

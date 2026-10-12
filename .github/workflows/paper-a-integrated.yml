@@ -1,43 +1,42 @@
-name: Paper A integrated manuscript
+name: Paper A integrated manuscript and mathematics
 on:
   push:
-    branches:
-      - research/paper-a-integrated-2026-10-12
+    branches: [research/paper-a-integrated-2026-10-12]
     paths:
-      - 'paper_a_integrated/manuscript.tex.xz'
-      - 'paper_a_integrated/v12_verifier_sources.tar.xz'
+      - 'paper_a_integrated/paper.tex'
+      - 'paper_a_integrated/related_work_expanded.tex'
+      - 'paper_a_integrated/new_bibliography.tex'
+      - 'paper_a_integrated/v10_local_geometry.tex'
+      - 'paper_a_integrated/v12_cnf_correspondence.tex'
       - 'paper_a_integrated/build.sh'
+      - 'paper_a_integrated/verification/**'
+      - 'paper_a_integrated/v12_sources/verification/**'
       - '.github/workflows/paper-a-integrated.yml'
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
-  build:
+  build-and-audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
-      - name: Install LaTeX
+      - name: Install LaTeX and PDF tools
         run: |
           sudo apt-get update
           sudo apt-get install -y texlive-latex-extra texlive-fonts-recommended poppler-utils
-      - name: Reconstruct and compile verified manuscript
+      - name: Run independent geometry, encoding and witness checks
+        run: python3 paper_a_integrated/verification/verify_paper_a.py
+      - name: Compile from canonical readable sources
         run: bash paper_a_integrated/build.sh
-      - name: Verify unpackable V12 source bundle
-        run: |
-          echo "63fd07f67b61046041081108708378dac02e13476e07530d6c476d7efd839804  paper_a_integrated/v12_verifier_sources.tar.xz" | sha256sum -c -
-          mkdir -p paper_a_integrated/v12_sources
-          tar -xJf paper_a_integrated/v12_verifier_sources.tar.xz -C paper_a_integrated/v12_sources
-          python3 paper_a_integrated/v12_sources/verification/test_encoding_semantics.py
-      - name: Commit compiled PDF and unpacked sources to research branch
+      - name: Commit PDF and source hash manifest on research branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add paper_a_integrated/paper.tex paper_a_integrated/paper.pdf paper_a_integrated/MANUSCRIPT_SHA256SUMS paper_a_integrated/v12_sources/
+          git add paper_a_integrated/paper.pdf paper_a_integrated/MANUSCRIPT_SHA256SUMS
           if ! git diff --cached --quiet; then
-            git commit -m "Compile integrated Paper A and expand V12 verification sources"
+            git commit -m "Build reviewed Paper A manuscript and checksum manifest"
             git push origin HEAD:research/paper-a-integrated-2026-10-12
           fi
