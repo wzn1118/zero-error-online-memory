@@ -45,3 +45,7 @@ The earlier paper's online/static logarithmic **bit** separation and multiround 
 Mathematical-substance provisional score: 89/100; journal submission maturity: 87/100. The branch is a research record, not a peer-reviewed publication or a claim of top-journal acceptance. The complete canonical LaTeX/PDF and DRUP files are distributed in the downloadable research package, not committed to this branch in this initial lightweight GitHub snapshot.
 
 Reference Zenodo V2 DOI: https://doi.org/10.5281/zenodo.23299231
+
+## V13 independent verification addendum (12 October 2026)
+
+The separate research branch now includes `paper_a_integrated/verification/verify_folded_cube_exception.py`, an independently coded no-SAT exhaustive folded-cube check supporting the seven-dimensional exception. In the full downloadable V13 submission package, the updated 21-page article adds a detailed local-predecessor argument, a five-case source-to-CNF implication, expanded prior work, and separately archived frozen five-case CNF/DRUP proofs. The downloadable package is the canonical V13 article; this GitHub branch is a partial source mirror and does not yet contain the exact complete V13 PDF/TeX or frozen proof traces. No mathematical theorem or publication status on `main` has been changed.
