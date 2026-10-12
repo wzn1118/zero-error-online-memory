@@ -1,27 +1,18 @@
-# Integrated Paper A: proof dependency map
+# Paper A V13 — proof-to-source map
 
-**Research branch:** `research/paper-a-integrated-2026-10-12`.
+Canonical journal manuscript: `paper_a_integrated/paper.tex` (21 pages; SHA-256 58a289f787f4fda98327b6619212a4966225f58052529c7f833ede867abfe2c5).
 
-Main unified theorem: for n≥7 and one blind overwrite, the exact optimal label cardinality is the same at erasure budgets q=n−3 and q=n−2, namely 2^n−⌊2^(n−1)/n⌋+1[n=7].
+| Mathematical component | Source | Verification |
+| --- | --- | --- |
+| One-write high-erasure matching normal form | analytic manuscript; V9 | general proof |
+| Complement-invariant variational theorem | analytic manuscript; V5 | small n examples |
+| Sharp finite length bound | analytic manuscript; V4–V5 | finite audits |
+| Hamming-prefix cubical packing, n=13 exceptional packing | analytic manuscript; V7 | finite construction check |
+| Collision–adjacency D≤e(C) for n−3 layer | analytic manuscript; V10 | `verification/independent_v10_audit.py` at n=7,8 |
+| Seven-cube folded quotient classification | analytic manuscript; V7–V12 | `verification/verify_folded_cube_exception.py` |
+| 119-label nonexistence for (7,1,4) | V12 independent CNF + DRUP | `PaperA_V13/v12_certificates/verify_all.sh` after archive reassembly |
+| Finite encoding tests and 120-label upper bound | V12 | `verification/independent_v12_encoding_audit.py` and V12 suite |
 
-| Component | Prior source | Claim used | Type of evidence |
-|---|---|---|---|
-| Online operational model and collision restriction | V2 corrected | source fibers min distance | analytic |
-| High-erasure exact matching normal form | V9 | terminal forced-pair matching | analytic |
-| Exact complement-invariant variation | V5 | q=n−2 state optimum | analytic + finite |
-| Universal alphabet lower bound | V4, V5 | N−⌊N/(2n)⌋ | analytic |
-| Hamming-prefix cubical construction | V7 | upper bound for n≥8 (n=13 special) | analytic + finite checks |
-| Collision–adjacency converse | V10 | same bound at q=n−3 | analytic + finite checks |
-| Seven-cube orbit cases | V11–V12 | reductions of 119-state possibility | analytic finite-case audit |
-| Five CNF/DRUP proof tracks | V12 WSL fixed | unsatisfiability of five encoded cases | computational proof |
-| 120-state seven-cube protocol | V11–V12 | matching upper bound | exhaustive execution |
+The full V13 reproducibility ZIP, including all canonical sources, compiled PDF, 5 frozen CNFs, 5 frozen DRUP proofs and verification logs, can be recovered from `archive_parts` with `REBUILD_V13_ARCHIVE.sh --extract`.
 
-Full original fixed certificate archive is available with the independently distributed research package. The GitHub script archive supports regeneration of all five traces from source. Computational proof validity must be distinguished from correctness of mathematical encoding into CNF.
-
-**Local canonical hashes (12 October 2026)**
-
-- paper.tex: `07ce9a85328a043390c194302a9003aa45efe4ef13d477767fb36f7c4a3aa0b6`
-- locally compiled paper.pdf: `c22148c75b33917bad4c02743eda7e149ea66ede1b13c80244e33a635ca90654`
-- V12 fixed proof archive: `180159fb80db7886c662d9c450da8daeb5b5835542312cb4a3d386e7a3723eb9`
-
-A new GitHub Actions build can produce a different PDF byte hash due to compiler timestamps even when the TeX source is identical; compare its committed source hash first.
+A checked unsatisfiable CNF is not by itself a proof that all counterexamples satisfy that encoding. The general geometric inequalities and the five-case reduction remain independent mathematical proof obligations.

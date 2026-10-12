@@ -1,0 +1,30 @@
+name: Paper A V13 — canonical reproducibility
+on:
+  push:
+    branches:
+      - main
+      - research/paper-a-v13-verification-upgrade-2026-10-12
+    paths:
+      - 'paper_a_integrated/**'
+      - '.github/workflows/paper-a-v13-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quick-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LaTeX and supporting tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-extra texlive-fonts-recommended poppler-utils g++ unzip
+      - name: Restore SHA-256 verified complete V13 package
+        run: bash paper_a_integrated/REBUILD_V13_ARCHIVE.sh --extract
+      - name: Run V13 source, finite geometry and LaTeX audit
+        run: |
+          cd paper_a_integrated/PaperA_V13
+          bash RUN_QUICK.sh
