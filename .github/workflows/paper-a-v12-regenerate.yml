@@ -1,0 +1,25 @@
+name: Paper A full V12 proof regeneration
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate CNFs and independent DRUP proofs
+        run: |
+          cd paper_a_integrated/v12_sources
+          bash regenerate_proofs.sh | tee regeneration.log
+      - name: Upload machine-checked proof traces
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-a-v12-cnf-drup-proofs
+          path: |
+            paper_a_integrated/v12_sources/rederived/
+            paper_a_integrated/v12_sources/regeneration.log
+          retention-days: 90
