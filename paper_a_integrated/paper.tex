@@ -1,0 +1,692 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,microtype,geometry,amsmath,amssymb,amsthm,mathtools,mathrsfs,booktabs,array,graphicx,hyperref,enumitem,xcolor}
+\geometry{left=25mm,right=25mm,top=23mm,bottom=23mm}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!45!black,citecolor=blue!45!black,pdfauthor={Zinan Wang},pdftitle={Exact State Alphabets for Blind One-Write Memory at Two Adjacent Erasure Levels}}
+\setlength{\parindent}{1.3em}\setlength{\parskip}{.16em}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\F}{\mathbb F_2}
+\newcommand{\dist}{d_{\rm H}}
+\newcommand{\vol}{V}
+\newcommand{\Dic}{\mathsf D}
+\newcommand{\Rt}{R_T^{\mathrm{on}}}
+\title{\textbf{Exact State Alphabets for Blind One-Write Memory}\\[4pt]\large An Erasure Plateau, Sharp Cubical Constructions, and Verified Finite Obstructions}
+\author{Zinan Wang}
+\date{12 October 2026}
+\begin{document}\maketitle
+\begin{abstract}
+We study the minimum cardinality of a persistent state alphabet used by a deterministic encoder to maintain a binary record under a single blind coordinate assignment, while a phase-aware decoder must recover erased coordinates with zero error. A first exact matching normal form characterizes the high-erasure regime via forced successor edges and residual graph matching. At erasure allowance $q=n-2$, an exact variational formula over antipodal source sets reduces the problem to an exterior Hamming-neighborhood overlap statistic. A geometric converse, Hamming-prefix cubical packings, and a computer-assisted finite certificate together yield an exact two-level plateau: for $n\ge7$ and $q\in\{n-3,n-2\}$, the minimum alphabet size is $2^n-\lfloor2^{n-1}/n\rfloor+\mathbf1_{\{n=7\}}$. The exceptional seven-coordinate four-erasure lower bound is supported by five separately checked DRUP refutations of frozen CNF files and a directly audited $120$-label protocol. For every $n\ge8$, matching analytic bounds and explicit constructions establish the formula without finite SAT assumptions. We distinguish label cardinality from rounded bit cost, specify the precise scope of the finite certificate, and give reproducible artifacts for the combinatorial claims.
+\end{abstract}
+\noindent\textbf{Keywords:} zero-error coding; online state memory; blind overwrite; Hamming graphs; exact combinatorial optimization; computer-assisted proof.
+\section{Introduction}
+A blind coordinate assignment discloses its position and new bit to the update operation while concealing the overwritten bit. An encoder that stores only a finite label must apply the same state transition to every record compatible with that label. This creates a structural constraint absent from static erasure coding: each initial color class forces simultaneous successors under every legal assignment. The resulting minimization concerns the \emph{number of possible persistent labels}, even when this number cannot reduce the required binary word length. The distinction is central to the new exact results.
+
+The principal conclusion is the two-level formula in Theorem~\ref{thm:plateau}. Its ingredients are an exact high-erasure matching normal form (Theorem~\ref{thm:normal}), a variational reduction over complement-invariant source sets (Theorem~\ref{thm:v5variation}), an alphabet lower bound for the next erasure layer (Theorem~\ref{thm:next-converse}), and an all-length Hamming-prefix cubical construction (Lemma~\ref{lem:v7packing}). The seven-coordinate exception uses a finite, independently checked propositional refutation supported by source-to-CNF reduction arguments (Theorem~\ref{thm:seven-computer}). Section~\ref{sec:reproduction} gives the proof's trust boundary and reproduction instructions.
+
+The work follows the characteristic-graph viewpoint in static zero-error coding~\cite{witsenhausen1976} and uses classical Hamming codes~\cite{hamming1950,macwilliams1977}. The alphabet-size measure and blind transition interface differ from the communication objective in oblivious updates~\cite{nakkiran2014}. No claim of a general complexity classification for arbitrary horizons is made.
+
+
+\section{Operational model and memory accounting}
+We use a finite-horizon state model whose static case is zero-error coding with decoder side information~\cite{witsenhausen1976}. Its transitions receive only the current state and the assigned coordinate--value pair.
+
+Write $[n]=\{1,\ldots,n\}$ and let the source be $x\in\F^n$. An update $u=(i,b)$ produces
+\[
+U_{i,b}(x)_j=\begin{cases}b,&j=i,\\x_j,&j\ne i.\end{cases}
+\]
+The memory at the beginning is $M_0=f(x)$, where $f:\F^n\to[K]$. Its online transitions obey
+\begin{equation}\label{eq:transition}
+ M_{t+1}=\Phi_t(M_t,i_t,b_t),\qquad 0\le t<T.
+\end{equation}
+No transition may inspect $x_t$, the former bit $x_{t,i_t}$, or uncharged persistent work space. The encoder, transition maps and final decoder are deterministic and may be nonlinear and nonuniform in $n$. The round index $t$ is public at decoding time; the update sequence remains private.
+
+After any $0\le t\le T$, the adversary selects $E\subseteq[n]$, $|E|\le q$. The decoder is supplied the current $x_{t,[n]\setminus E}$, together with $(M_t,E,t)$, and must reproduce the full tuple $x_{t,E}$. Every initial vector, legal update sequence, phase and erasure choice must be correct. The requirement also applies when updates reassign the current value or revisit an already modified coordinate.
+
+\begin{definition}\label{def:r}
+$R_T^{\rm on}(n,q)$ is the smallest integer $R\ge0$ admitting an online state machine with $K\le 2^R$ labels and the above universal recovery guarantee. We assume $n\ge1$, $T\ge0$, and $1\le q\le n$.
+\end{definition}
+
+Define $\kappa_T(n,q)$ as the minimum number of persistent memory labels in a valid $T$-write, $q$-erasure protocol. Because every bit budget $R$ permits at most $2^R$ labels, the two resource measures obey $R_T^{\rm on}(n,q)=\lceil\log_2\kappa_T(n,q)\rceil$. The integer-valued parameter is used in Section~\ref{sec:variational}.
+
+Any overwrite dictionary forms part of the charged state $M_t$. In particular, the decoder receives the erasure observation and the phase, together with the stored label, while the update transcript remains private. All state counts refer to alphabet cardinality; explicit combinatorial ranking implements the stated bit budgets.
+
+We set throughout
+\[
+ s=T+q,\qquad V(n,r)=\sum_{j=0}^{\min(r,n)}\binom nj,\qquad D_T(n)=\sum_{k=0}^{\min(T,n)}\binom nk2^k.
+\]
+The quantity $D_T(n)$ counts all partial Boolean maps from at most $T$ coordinates to their most recent assigned values.
+
+\section{The initial collision restriction}
+We first strengthen the initial-state collision argument for one erased coordinate to an arbitrary erased set.
+
+\begin{lemma}[Erasing a collision]\label{lem:collision}
+If distinct $x,y\in\F^n$ satisfy $f(x)=f(y)$ and $\dist(x,y)\le T+q$, universal zero-error recovery is impossible.
+\end{lemma}
+\begin{proof}
+Let $D=\{i:x_i\ne y_i\}$, with $d=|D|\ge1$. If $d\le q$, apply no updates and erase an $E\supseteq D$ of size at most $q$. The decoder sees equal memory and equal complementary coordinates, yet different erased tuples.
+
+If $d>q$, choose $d-q$ coordinates from $D$, and apply the same overwrite $U_{i,0}$ in both worlds at those coordinates. This takes at most $T$ operations. Their memory states remain equal by determinism of each $\Phi_t$, and their current vectors now differ at exactly the $q$ remaining coordinates of $D$. Erasing those coordinates creates the same decoder observation and contradictory required outputs. The contradiction applies to arbitrary deterministic encoding and transition maps.
+\end{proof}
+
+
+
+\section{The exact matching normal form}
+Write $X=\F^n$ and $N=|X|=2^n$. For an integer $d$, let $H_n^{\ge d}$ be the graph on $X$ joining pairs of distinct words with Hamming distance at least $d$, and write $\nu(H)$ for the cardinality of a maximum matching in a graph $H$. A matching means a set of vertex-disjoint unordered pairs.
+\begin{theorem}[One-write high-erasure matching principle]\label{thm:normal}
+Let $n\ge3$ and $q\ge1$ with $3(q+1)>2n$. Define $G_0=H_n^{\ge q+2}$ and $G_1=H_n^{\ge q+1}$. For any matching $M\subseteq E(G_0)$, define
+\[
+ \mathcal F(M)=\bigcup_{\{x,y\}\in M}\bigl\{\{U_{i,b}(x),U_{i,b}(y)\}:i\in[n],\ b\in\F\bigr\},
+\]
+where the braces on the right are unordered pairs, with repeated pairs counted once. Let
+\[
+ W(M)=\bigcup_{e\in\mathcal F(M)}e,\qquad
+ R(M)=X\setminus W(M).
+\]
+Then the unrestricted deterministic optimum is exactly
+\begin{equation}\label{eq:normal}
+\boxed{\quad\kappa_1(n,q)=\min_{M\text{ matching in }G_0}
+\max\bigl\{N-|M|,\ |\mathcal F(M)|+|R(M)|-\nu(G_1[R(M)])\bigr\}.\quad}
+\end{equation}
+For each candidate $M$, a protocol attaining the displayed maximum can be constructed using only maximum matching and elementary state lookups. In particular, there is an optimal protocol whose initial fibers are pairs and singletons and whose terminal fibers are exactly the forced edges, a maximum matching of residual vertices, and residual singletons.
+\end{theorem}
+\begin{proof}
+For any three binary words, the sum of their three pairwise Hamming distances is at most $2n$: each coordinate contributes either zero or two. Hence $3(q+1)>2n$ implies every terminal code with minimum distance $q+1$ has size at most two. The stronger initial minimum distance $q+2$ gives the same conclusion for initial fibers. Thus every initial encoder determines a matching $M$ in $G_0$; its remaining nonempty initial fibers are singleton words, and $N-|M|$ initial labels are compulsory.
+
+Fix an initial pair $\{x,y\}\in M$ and an update event $(i,b)$. Its two updated words must receive the same terminal label, as the transition acts on their common initial label and identical event. They remain distinct and have distance at least $q+1$, so they constitute a forced pair in $G_1$. Every \emph{distinct} forced pair demands a distinct terminal label: no valid terminal label can contain three words. Every vertex in the residual set $R(M)$ is reachable at phase one (initialize that word and overwrite one coordinate with its already present value). It cannot be covered by a label reserved for a forced pair. Of the residual vertices, a terminal label covers at most two, and a doubleton must be an edge in $G_1[R(M)]$. Hence at most $\nu(G_1[R(M)])$ disjoint residual doubletons can be formed, forcing at least $|R(M)|-\nu(G_1[R(M)])$ additional terminal labels. This proves the second lower bound.
+
+For achievability, give each source pair in $M$ one initial label, and each remaining initial word its own label. At phase one, assign one label to each distinct forced pair, one label to every edge in a chosen maximum matching of $G_1[R(M)]$, and singleton labels to unmatched residual words. These sets cover $X$. For an initial paired label, the specified write determines its forced-pair successor label. For an initial singleton label, the write determines a unique current word, and a canonical terminal label containing it can be selected. Both transitions depend only on the stored initial label and $(i,b)$. All fibers respect their corresponding Hamming-distance requirements, giving universal zero-error recovery at both phases. Phase-specific label names may be reused, so the common cardinality is the maximum of the two phase budgets. Minimizing over $M$ proves \eqref{eq:normal}.
+\end{proof}
+
+\begin{remark}[Exact reduction, not a closed-form optimization]
+Formula~\eqref{eq:normal} removes transition maps, encoders and decoders from the outer search. It leaves a finite minimization over matchings in an explicitly defined graph, with one polynomial-time maximum-matching computation for each candidate. Thus it is a strict structural reduction; it does not imply a polynomial-time algorithm in the binary-record length $n$, nor determine the original general $(T,q)$ complexity class.
+\end{remark}
+
+
+
+\section{Sharp leading constant for the one-write state deficit}\label{sec:v4sharp}
+
+We examine the integer state alphabet at the largest erasure budget that permits an initial collision. We now determine its exact first-order asymptotics over \emph{all} blocklengths. The argument has two complementary parts. An exact accounting identity for forced terminal pairs gives a stronger converse, while a family of antipodally symmetric unions of subcubes makes the converse asymptotically tight. Both arguments apply to unrestricted, possibly nonlinear state machines under the operational model of Section~2.
+
+Throughout this section $n\ge4$, $q=n-2$, $N=2^n$, and
+\[
+ \Delta_n=N-\kappa_1(n,n-2).
+\]
+A phase-zero fiber containing two source vectors must be an antipodal pair by Lemma~\ref{lem:collision}. Let $\mathcal P$ denote the collection of those fibers, put $a=|\mathcal P|$, and set
+\[
+ C=\bigcup_{P\in\mathcal P}P,\qquad |C|=2a.
+\]
+The set $C$ is complement-invariant. Write $e(C)$ for the number of ordinary distance-one edges of the binary cube induced by $C$, and write $B_1(C)=\{y:d_{\mathrm H}(y,C)\le1\}$ for its closed radius-one neighborhood.
+
+\subsection{An edge--neighborhood accounting identity}
+
+\begin{lemma}[Forced-edge multiplicity and support]\label{lem:v4-edge-identity}
+For the source pairs $\mathcal P$ above, let $\mathcal F$ be the set of distinct unordered terminal pairs compelled by all possible one-coordinate assignments. Then
+\begin{equation}\label{eq:v4-forced-count}
+ \boxed{\quad |\mathcal F|=2na-e(C),\qquad
+    \bigcup_{F\in\mathcal F}F=B_1(C).\quad}
+\end{equation}
+Moreover,
+\begin{equation}\label{eq:v4-ball-bound}
+ \boxed{\quad |B_1(C)|\le2(n+1)a-2e(C).\quad}
+\end{equation}
+\end{lemma}
+\begin{proof}
+Each antipodal source pair $P=\{x,\bar x\}$ produces $2n$ distinct output pairs
+\[
+ F(P,i,b)=\{U_{i,b}(x),U_{i,b}(\bar x)\},\qquad
+ i\in[n],\quad b\in\mathbb F_2.
+\]
+The two members agree exactly at coordinate $i$, with common value $b$, so that the output pair uniquely identifies $(i,b)$. Every output pair has precisely two possible antipodal predecessor fibers: they are obtained by assigning the two opposite original bits at coordinate $i$. These two predecessor fibers are simultaneously present in $\mathcal P$ precisely when their members form two distance-one edges inside $C$. Each pair of adjacent antipodal fibers contributes two such cube edges and two duplicated output pairs. Hence the $2na$ generated output pairs lose exactly $e(C)$ occurrences under deduplication, proving the first identity.
+
+The outputs associated with a single source pair are exactly the words at Hamming distance zero or one from either of its members. Taking their union over $\mathcal P$ proves the support identity.
+
+Finally, count the incidences $(x,y)$ with $x\in C$ and $y\in B_1(x)$. There are $(n+1)|C|=2(n+1)a$ incidences. Each $y\in C$ is counted once for its own center and $\deg_C(y)$ additional times for its neighbors in $C$. Thus at least $\sum_{y\in C}\deg_C(y)=2e(C)$ of these incidences are repetitions. Every additional intersection of radius-one balls only decreases the union size, proving~\eqref{eq:v4-ball-bound}.
+\end{proof}
+
+\begin{theorem}[Sharp universal finite-length converse]\label{thm:v4-converse}
+For every integer $n\ge4$,
+\begin{equation}\label{eq:v4-universal}
+ \boxed{\quad\kappa_1(n,n-2)\ge
+ 2^n-\left\lfloor\frac{2^n}{2n}\right\rfloor,
+ \qquad \Delta_n\le\left\lfloor\frac{2^n}{2n}\right\rfloor.\quad}
+\end{equation}
+This bound is valid for arbitrary deterministic initialization, nonlinear updates, and phase-dependent zero-error decoders.
+\end{theorem}
+\begin{proof}
+There are $N-a$ different phase-zero labels. At phase one, every member of $\mathcal F$ must occupy its own label: two distinct pairs cannot occupy the same label, as each is a pair of current words at distance $n-1$, and $A(n,n-1)=2$ for $n\ge4$. Every current word outside $B_1(C)$ remains reachable after one write by starting from that word and assigning an existing coordinate value. Such a word cannot join a label occupied by a forced pair. The remaining terminal labels support at most two words each. Therefore Lemma~\ref{lem:v4-edge-identity} yields
+\begin{align}
+ K&\ge |\mathcal F|+\frac{N-|B_1(C)|}{2}\\
+  &\ge 2na-e(C)+\frac{N-2(n+1)a+2e(C)}{2}\\
+  &=\frac N2+(n-1)a.
+\end{align}
+Together with the phase-zero count, every admissible protocol satisfies
+\begin{equation}\label{eq:v4-two-lines}
+ \boxed{\quad K\ge\max\left\{N-a,\frac N2+(n-1)a\right\}.\quad}
+\end{equation}
+The decreasing first affine function and increasing second affine function meet at $a=N/(2n)$, where the common value is $N-N/(2n)$. Taking the integer ceiling of $K\ge N-N/(2n)$ gives~\eqref{eq:v4-universal}.
+\end{proof}
+
+Forced-edge multiplicity and reachable-neighborhood size cancel the induced-edge contribution $e(C)$ in~\eqref{eq:v4-two-lines}. It also gives $\kappa_1(4,2)\ge14$; the matching upper bound follows from two antipodal source pairs.
+
+\subsection{Subcube unions that attain the leading constant}
+
+\begin{theorem}[Subcube-union protocol]\label{thm:v4-subcube}
+Let $n>m\ge5$, and let $A\subseteq\mathbb F_2^m$ be invariant under bitwise complementation and have minimum Hamming distance at least three. Put $t=|A|$ and $a=t2^{n-m-1}$. If $t\le2^m/n$, then there is a deterministic one-write, $(n-2)$-erasure protocol with precisely
+\begin{equation}\label{eq:v4-subcube-budget}
+ \boxed{\quad K_0=N-a,\qquad
+ K_1=\frac N2+(n-1)a\le K_0.\quad}
+\end{equation}
+In particular, $\Delta_n\ge a$.
+\end{theorem}
+\begin{proof}
+Write each source word as $(u,v)$ with $u\in\mathbb F_2^m$ and $v\in\mathbb F_2^{n-m}$. Select the source-pair centers
+\[
+ C=A\times\mathbb F_2^{n-m}.
+\]
+This set is complement-invariant because $A$ is, and $|C|=t2^{n-m}=2a$. Give each complementary pair in $C$ one initial label and give every source outside $C$ a singleton label. This requires $K_0=N-a$ labels.
+
+Put $p=n-m$. There are no distance-one edges between distinct prefix slices indexed by $A$, because the minimum distance in $A$ is at least three. Every slice is a full $p$-dimensional subcube, so the induced cube-edge count is
+\[
+ e(C)=\frac{p|C|}{2}=pa.
+\]
+The disjoint radius-one neighborhoods of the prefix codewords yield
+\[
+ B_1(C)=B_1(A)\times\mathbb F_2^p,\qquad
+ |B_1(C)|=t(m+1)2^p=2a(m+1).
+\]
+For each initial pair and write event, allocate the forced output pair as one terminal fiber; deduplicate pairs common to two source pairs. By Lemma~\ref{lem:v4-edge-identity}, this creates $2na-pa=a(n+m)$ terminal fibers. The words not covered by these pairs form a complement-invariant set, since both $C$ and its radius-one neighborhood are complement-invariant. Partition this remaining set into complementary pairs; each is a valid terminal fiber of distance $n$. Every forced fiber has distance $n-1$. Thus all phase-one fibers admit unique recovery of up to $n-2$ erased coordinates, and their total number is
+\[
+ K_1=a(n+m)+\frac{N-2a(m+1)}2
+    =\frac N2+(n-1)a.
+\]
+An initial paired fiber transitions to its forced output pair under each assignment. An initial singleton transitions to any terminal fiber containing its updated word. Both choices depend only on the initial label and the write event. The condition $a\le N/(2n)$ is equivalent to $t\le2^m/n$ and guarantees $K_1\le K_0$, proving~\eqref{eq:v4-subcube-budget}.
+\end{proof}
+
+\begin{lemma}[Polynomial-size prefix selection]\label{lem:v4-prefix}
+Let $\ell=\lceil\log_2 n\rceil$ and $m=\lceil\log_2(n\ell^2)\rceil$. For every $n\ge1024$ there is a deterministically computable complement-invariant code $A\subseteq\mathbb F_2^m$ of minimum distance three and cardinality
+\begin{equation}\label{eq:v4-prefix-size}
+ t=2\left\lfloor\frac{2^m}{2n}\right\rfloor
+ \ge\frac{2^m}{n}-2.
+\end{equation}
+The prefix code can be found by a greedy procedure in time polynomial in $n$.
+\end{lemma}
+\begin{proof}
+Write $V(m,2)=1+m+\binom m2$. The space $\mathbb F_2^m$ contains $2^{m-1}$ complementary pairs. Greedily choose pairs $\{u,\bar u\}$ while requiring their members to be at distance at least three from all previously selected members. Selecting one pair eliminates at most $2V(m,2)$ candidate pairs, since each of its two members has at most $V(m,2)$ words at distance at most two. The procedure can therefore select at least $2^{m-1}/[2V(m,2)]$ complementary pairs. The required number, $t/2=\lfloor2^{m-1}/n\rfloor$, is attainable whenever $n\ge2V(m,2)$.
+
+For $n\ge1024$, the elementary inequalities $\ell^2\le2^{\ell-1}$ and $n\ge4\ell^2$ imply
+\[
+ m\le2\ell-1,\qquad 2V(m,2)=m^2+m+2
+ \le(m+1)^2\le4\ell^2\le n.
+\]
+The greedy criterion is thus satisfied. Since $2^m<2n\ell^2$, exhaustive enumeration of all $2^{m-1}$ complementary pairs and comparison with the selected pairs takes polynomial time in $n$. The choice automatically gives complement-invariance and the stated minimum distance.
+\end{proof}
+
+\begin{theorem}[Sharp first-order state-alphabet asymptotics]\label{thm:v4-main}
+For every integer $n\ge1024$, with $\ell=\lceil\log_2n\rceil$,
+\begin{equation}\label{eq:v4-sharp-bounds}
+ \boxed{\quad
+ \left(1-\frac2{\ell^2}\right)\frac{2^n}{2n}
+ \le\Delta_n\le\left\lfloor\frac{2^n}{2n}\right\rfloor.\quad}
+\end{equation}
+Consequently, along \emph{all} positive blocklengths,
+\begin{equation}\label{eq:v4-sharp-limit}
+ \boxed{\qquad\lim_{n\to\infty}\frac{2n\,[2^n-\kappa_1(n,n-2)]}{2^n}=1.\qquad}
+\end{equation}
+The lower bound is realized by a deterministic construction based on complement-invariant prefix codes and subcube unions.
+\end{theorem}
+\begin{proof}
+Apply Lemma~\ref{lem:v4-prefix} to Theorem~\ref{thm:v4-subcube}. The resulting source-pair count is
+\[
+ a=\frac{t2^{n-m}}2
+ \ge\frac{2^n}{2n}-\frac{2^n}{2^m}
+ \ge\left(1-\frac2{\ell^2}\right)\frac{2^n}{2n},
+\]
+using $2^m\ge n\ell^2$. Since $t\le2^m/n$, the constructed alphabet contains $N-a$ labels, and therefore $\Delta_n\ge a$. The universal upper bound is Theorem~\ref{thm:v4-converse}. The two normalized bounds converge to one and prove~\eqref{eq:v4-sharp-limit}.
+\end{proof}
+
+
+
+\section{An exact variational principle and finite optima}\label{sec:variational}
+
+We sharpen the general converse by an exact finite combinatorial formulation. This formulation eliminates arbitrary transition maps from the optimization, reduces the state-alphabet problem to overlap statistics of antipodal subsets of the Boolean cube, and produces an infinite family of exact finite optima.
+
+Write $\bar x=x\oplus\mathbf1$ and $\overline C=\{\bar x:x\in C\}$. For any complement-invariant subset $C=\overline C\subseteq\F^n$, write $a=|C|/2$ and
+\[
+ d_C(y)=|\{i\in[n]:y\oplus e_i\in C\}|,\qquad
+ \Xi(C)=\sum_{y\notin C}(d_C(y)-1)_+,
+ \qquad (u)_+=\max\{0,u\}.
+\]
+The integer $\Xi(C)$ counts the excess of overlapping radius-one neighborhoods at words outside $C$. Complementation preserves $d_C$, so $\Xi(C)$ is even.
+
+\begin{theorem}[Exact finite state-alphabet variational principle]\label{thm:v5variation}
+For every $n\ge4$, let $N=2^n$. Then the minimum state-alphabet cardinality for one blind overwrite with up to $n-2$ erasures equals
+\begin{equation}\label{eq:v5variation}
+\boxed{\quad
+ \kappa_1(n,n-2)=
+ \min_{\substack{C\subseteq\F^n\\ C=\overline C}}
+ \max\left\{N-\frac{|C|}{2},\quad
+   \frac N2+\frac{(n-1)|C|}{2}+\frac{\Xi(C)}2\right\}.
+\quad}
+\end{equation}
+Every set $C$ in this minimization induces an explicit deterministic protocol achieving the displayed maximum, with only one- or two-element initial and terminal state supports.
+\end{theorem}
+\begin{proof}
+Fix any valid protocol. By the initial collision lemma with $T+q=n-1$, each non-singleton initial state fiber is an antipodal pair. Let $C$ be the union of these pairs, and put $a=|C|/2$. At phase zero, exactly $N-a$ nonempty initial labels are required.
+
+Let $e(C)$ denote the induced distance-one edge count. Lemma~\ref{lem:v4-edge-identity} identifies exactly $2na-e(C)$ distinct forced phase-one pairs, with union of endpoints $B_1(C)$. Each forced pair must use its own label because the required phase-one minimum distance is $n-1$ and $A(n,n-1)=2$. No such label may additionally contain a word outside $B_1(C)$. At most two words can share any other phase-one label.
+
+Counting the radius-one ball incidences more precisely gives an \emph{identity}:
+\begin{equation}\label{eq:v5neighborhood}
+ |B_1(C)|=2(n+1)a-2e(C)-\Xi(C).
+\end{equation}
+Indeed, a point $y\in C$ appears once as its own center and $d_C(y)$ more times among the balls of its neighbors, accounting for $\sum_{y\in C}d_C(y)=2e(C)$ repeated incidences. A point $y\notin C$ occurs $d_C(y)$ times and contributes $(d_C(y)-1)_+$ repeats. Summing these disjoint kinds of repetitions yields~\eqref{eq:v5neighborhood}. It follows that the phase-one alphabet requires at least
+\begin{align*}
+ K_1&\ge (2na-e(C))+\frac{N-|B_1(C)|}{2}\\
+ &=\frac N2+(n-1)a+\frac{\Xi(C)}2.
+\end{align*}
+Taking the larger of the phase-zero and phase-one lower bounds proves that every valid protocol uses at least the right side of~\eqref{eq:v5variation}, evaluated at its own $C$.
+
+Conversely, fix any complement-invariant $C$. Use its $a$ antipodal pairs as phase-zero doubleton labels and all remaining words as phase-zero singleton labels. Give each distinct forced phase-one pair its own terminal label. The residual words $\F^n\setminus B_1(C)$ are complement-invariant; partition them into antipodal pairs, each receiving one further terminal label. Their count is exactly $(N-|B_1(C)|)/2$, so equality holds in the displayed terminal count. Map each paired initial label to the forced output pair specified by the write event, and each singleton initial label to a canonical terminal label containing its updated word. The transition requires only the current label and the write event. Initial doubletons have Hamming distance $n$ and terminal doubletons have distance $n-1$ or $n$; therefore every set of at most $n-2$ erased bits is uniquely reconstructible at both phases. Public phase information permits reuse of the larger of the two label alphabets. This achieves the maximum in~\eqref{eq:v5variation}, and minimization over $C$ completes the proof.
+\end{proof}
+
+\begin{theorem}[Exact optimal alphabets at all dyadic blocklengths]\label{thm:v5dyadic}
+For every integer $r\ge2$ and $n=2^r$,
+\begin{equation}\label{eq:v5dyadic}
+\boxed{\qquad \kappa_1(n,n-2)=2^n-\frac{2^{n-1}}n,
+ \qquad \Delta_n=\frac{2^{n-1}}n.\qquad}
+\end{equation}
+These integer optima are attained by explicitly indexed, polynomial-time computable state machines.
+\end{theorem}
+\begin{proof}
+Theorem~\ref{thm:v4-converse} gives the lower bound $\kappa_1(n,n-2)\ge N-N/(2n)$, with no rounding because $n$ is a power of two.
+
+Put $m=r+1$ and $p=n-m\ge1$. Set
+\[
+ A=\{0^m,1^m\},\qquad C=A\times\F^p.
+\]
+The two prefix words have distance $m\ge3$, and $C$ is closed under complementation. It consists of $2^{p+1}$ vectors, hence $a=2^p=2^{n-r-1}=N/(2n)$ antipodal pairs. A word outside $C$ has at most one adjacent word in $C$: changing a suffix coordinate preserves its excluded prefix, whereas changing one prefix coordinate could enter at most one of the two antipodal prefix values because $m\ge3$. Therefore $\Xi(C)=0$.
+
+The variational principle supplies an online protocol with
+\[
+ K_0=N-a,\qquad K_1=N/2+(n-1)a.
+\]
+Substituting $a=N/(2n)$ gives $K_1=N-a=K_0$. Thus the universal lower bound is attained. The structure of $C$ permits direct ranking of initial antipodal fibers and terminal forced edges using their prefix, suffix and overwrite coordinates by explicitly ranking the prefix and suffix indices; the $m=3,4$ cases are handled by the same explicit formulas. These rankings, transition maps and decoder procedures run in polynomial time in $n$.
+\end{proof}
+
+\begin{proposition}[The first non-dyadic exact optimum]\label{prop:v5n5}
+For five coordinates, one blind overwrite, and up to three erased coordinates,
+\[
+ \boxed{\quad \kappa_1(5,3)=29,\qquad R_1^{\rm on}(5,3)=5.\quad}
+\]
+\end{proposition}
+\begin{proof}
+Theorem~\ref{thm:v4-converse} gives $\kappa_1(5,3)\ge32-\lfloor32/10\rfloor=29$. For the matching construction, let $C$ consist of the three antipodal pairs
+\[
+ \{00000,11111\},\qquad\{00001,11110\},\qquad\{00010,11101\}.
+\]
+Then $a=3$ and direct adjacency counting gives $\Xi(C)=2$. Formula~\eqref{eq:v5variation} yields
+\[
+ K=\max\{32-3,\;16+4\cdot3+2/2\}=29.
+\]
+The variational proof constructs the required update and decoder maps.
+\end{proof}
+
+\begin{corollary}[Structure of exact dyadic extremizers]\label{cor:v5structure}
+Let $n=2^r\ge4$. For a complement-invariant initial paired-source set $C$, the canonical construction in Theorem~\ref{thm:v5variation} uses the optimum $\kappa_1(n,n-2)$ if and only if
+\[
+ \boxed{\qquad |C|=2^n/n,\qquad \Xi(C)=0.\qquad}
+\]
+Equivalently, each current word outside $C$ has at most one distance-one neighbor in $C$.
+\end{corollary}
+\begin{proof}
+Write $a=|C|/2$ and $N=2^n$. Equality in the lower bound $K\ge\max\{N-a,N/2+(n-1)a+\Xi/2\}$ at $K=N-N/(2n)$ forces $a\ge N/(2n)$ from the first term and $a\le N/(2n)-\Xi/[2(n-1)]$ from the second. Hence $a=N/(2n)$ and $\Xi=0$. The reverse implication follows by substitution in~\eqref{eq:v5variation}. The last equivalence is immediate from the nonnegative summands in the definition of $\Xi(C)$.
+\end{proof}
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{@{}rrrrr@{}}\toprule
+$n$ & $q=n-2$ & $\kappa_1(n,q)$ & $2^n-\kappa_1$ & certificate\\\midrule
+4 &2&14&2&dyadic exact\\
+5 &3&29&3&variational exact\\
+8 &6&240&16&dyadic exact\\
+16&14&63488&2048&dyadic exact\\\bottomrule
+\end{tabular}
+\caption{New exact integer state counts. The finite-size verifier enumerates every antipodal initial-pair selection for $n=4,5$, and checks complete transition/erasure observations for explicit optima at $n=4,5,8$.}\label{tab:v5exact}
+\end{table}
+
+The finite optimization~\eqref{eq:v5variation} also provides a direct route to optimality certificates and a natural combinatorial problem: minimize the exterior overlap functional $\Xi(C)$ over complementary-pair subsets of the Boolean cube. The dyadic extremizers combine a precise source-pair density with collision-free exterior neighborhoods. Other blocklengths admit an integer tradeoff between source-pair density and exterior overlap; the length-five optimum is the smallest instance in which positive overlap appears in an optimal protocol. The independent verifier \path{verification/verify_exact_alphabet.py} implements the integer optimization at $n=4,5$, checks the dyadic formulas, and enumerates the permitted write and erasure observations.
+
+
+
+\section{The complete finite-blocklength solution of the one-write alphabet problem}\label{sec:v7complete}
+
+The variational formula~\eqref{eq:v5variation} admits a complete finite-blocklength solution. The remaining ingredient is a mixed-size subcube selection inside a perfect binary Hamming code. The seven-dimensional exceptional value is supported by two complementary finite approaches: an exact combinatorial closure search and an machine-checked DRUP certificate for the adjacent erasure layer.
+
+Throughout this section $n\ge4$, $N=2^n$, $M=2^{n-1}$, and
+\[
+ D_n=N-\kappa_1(n,n-2),\qquad h_n=\left\lfloor\frac{M}{n}\right\rfloor.
+\]
+Theorem~\ref{thm:v4-converse} gives the universal inequality $D_n\le h_n$.
+
+\begin{theorem}[Exact optimum for every blocklength]\label{thm:v7all}
+For every $n\ge4$, the unrestricted deterministic one-write alphabet optimum satisfies
+\begin{equation}\label{eq:v7closed}
+\boxed{\quad \kappa_1(n,n-2)=2^n-\left\lfloor\frac{2^{n-1}}{n}\right\rfloor+\mathbf1_{\{n=7\}}.\quad}
+\end{equation}
+All instances admit explicit finite deterministic online protocols achieving the stated state cardinality. For every $n\ge8$, an optimal initial source-pair set can be chosen to have zero exterior neighborhood overlap, $\Xi(C)=0$.
+\end{theorem}
+
+\begin{lemma}[Hamming-prefix cubical packing]\label{lem:v7packing}
+For every $n\ge8$ there exists a complement-invariant set $C\subseteq\F^n$ such that
+\[
+ \boxed{\quad |C|=2h_n,\qquad \Xi(C)=0.\quad}
+\]
+It can be described explicitly by a perfect binary Hamming code of length $2^r-1$, where $r=\lfloor\log_2 n\rfloor$.
+\end{lemma}
+\begin{proof}
+Write $d=2^r$ and $m=d-1$; thus $d\le n<2d$ and $p=n-m=n-d+1\in[1,d]$. Let $H\subseteq\F^m$ be the binary Hamming code whose parity-check columns are precisely the nonzero vectors of $\F^r$. Its minimum Hamming distance is three. The sum of the check columns is zero for $r\ge3$, so $\mathbf1\in H$ and $H$ partitions into
+\[
+ B=2^{m-r-1}=2^{d-r-2}
+\]
+complementary pairs $\{u,\bar u\}$.
+
+For each of these $B$ pairs, choose either no suffix points or an affine subcube $D_i\subseteq\F^p$ of cardinality $2^{j_i}$, $0\le j_i\le p$. Add the two sets $\{u_i\}\times D_i$ and $\{\bar u_i\}\times\overline{D_i}$ to $C$. This produces a complement-invariant union of subcubes. Different prefix codewords are at distance at least three; each suffix subset is a subcube. Consequently, an exterior point has at most one neighbor in $C$, yielding $\Xi(C)=0$. The number of complementary source pairs is $a=\sum_i|D_i|$.
+
+We show that $a=h_n$ can be realized using at most $B$ suffix subcubes, apart from one explicitly handled length. Put $L=2^p$ and write $h_n=qL+t$, with $0\le t<L$. Selecting $q$ full suffix cubes and one cube of size $2^j$ for each $1$-bit of $t$ realizes $h_n$ using $q+\operatorname{popcount}(t)$ of the $B$ prefix pairs. Since
+\[
+ BL=2^{n-r-1}=\frac{M}{d},\qquad h_n\le\frac{M}{n},
+\]
+we have $q\le Bd/n$. If $n=d$, then $h_n=BL$, $q=B$, and $t=0$. Otherwise set $u=n-d\in[1,d-1]$, so $p=u+1$. For $r\ge4$ we have $B=2^{d-r-2}\ge2(d+1)$, and hence
+\[
+ B-q\ge\frac{Bu}{d+u}\ge u+1=p\ge\operatorname{popcount}(t),
+\]
+where the middle step follows from
+\[
+ 2(d+1)u-(d+u)(u+1)=(u-1)(d-u)\ge0.
+\]
+Thus the chosen number of prefix pairs never exceeds $B$.
+
+For $r=3$, we have $d=8$, $m=7$, $B=8$, and $8\le n\le15$. The values $(n,h_n,q+\operatorname{popcount}(t))$ are
+\[
+ (8,16,8),(9,28,7),(10,51,8),(11,93,8),
+ (12,170,7),(13,315,9),(14,585,7),(15,1092,6).
+\]
+Only $n=13$ uses nine pieces with eight prefix pairs. Here $p=6$ and
+$315=4\cdot64+32+16+8+2+1$. Place the final size-two cube $\{000000,000001\}$ and the singleton $\{111100\}$ under the same remaining prefix pair, keeping the other seven occupied prefix pairs unchanged. These two suffix components have distance at least four, so the resulting $C$ still satisfies $\Xi(C)=0$, and its pair count is $315$. Every length is covered.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:v7all}]
+For $n\ge8$, choose $C$ from Lemma~\ref{lem:v7packing}, giving $a=h_n$ and $\Xi(C)=0$. The exact variational principle~\eqref{eq:v5variation} constructs a valid protocol with
+\[
+ K=\max\{N-h_n,M+(n-1)h_n\}=N-h_n,
+\]
+because $nh_n\le M$. The universal converse $D_n\le h_n$ proves equality.
+
+At $n=4$, the two initial antipodal pairs with representatives $0,1$ have $a=2$ and $\Xi(C)=0$, giving $\kappa_1(4,2)=14$. At $n=5$, the representatives $0,1,2$ give $a=3$, $\Xi(C)=2$, and $\kappa_1(5,3)=29$, recovering Proposition~\ref{prop:v5n5}. At $n=6$, take the five representatives $5,10,21,23,26$ (with all words interpreted as six-bit vectors) and their antipodes. Direct neighborhood counting gives $a=5$, $\Xi(C)=4$, and $\kappa_1(6,4)=59$. In each case, the universal converse coincides with the construction.
+
+For $n=7$, the converse gives $\kappa_1(7,5)\ge119$. The length-seven perfect Hamming code yields $a=8$, $\Xi(C)=0$, hence $\kappa_1(7,5)\le120$. Lemma~\ref{lem:v7seven} below rules out 119, proving $\kappa_1(7,5)=120$. This completes the proof for all $n\ge4$.
+\end{proof}
+
+\begin{lemma}[The unique seven-coordinate exception]\label{lem:v7seven}
+In the seven-dimensional cube, every complement-invariant set of size eighteen has $\Xi(C)\ge6$. Consequently $\kappa_1(7,5)=120$.
+\end{lemma}
+\begin{proof}
+We prove the stronger statement that $a=9$ forces $\Xi(C)/2\ge3$. Identify antipodal pairs in $Q_7$ to obtain the folded six-cube $F$ with $64$ vertices $0,\ldots,63$ and neighbor sets
+\[
+ \mathcal N(v)=\{v\oplus2^i:0\le i<6\}\cup\{v\oplus63\}.
+\]
+A complement-invariant $C$ corresponds to a nine-vertex set $S\subset F$, and $\Xi(C)/2=\sum_{v\notin S}(\lvert\mathcal N(v)\cap S\rvert-1)_+$.
+
+For a set $E$ of at most two exterior exceptional vertices, define the closure operator $\operatorname{cl}_E(A)$ by repeatedly adjoining each $v\notin A\cup E$ that has at least two neighbors already in $A$. This is a monotone closure: if a target $S$ has no repeated exterior neighbors outside $E$, then $\operatorname{cl}_E(A)\subseteq S$ for every $A\subseteq S$. The search adds one allowed vertex at a time, closes the new set, and prunes any closure exceeding nine vertices or containing a forbidden vertex. It explores every resulting closed set, with repeated sets memoized. This recursion is exhaustive: if a valid closed nine-vertex target $S$ contains an already explored closed $A$, choosing any $v\in S\setminus A$ yields a closure contained in $S$; iteration must reach $S$.
+
+For $\Xi(C)/2=0$, graph translations let us assume $0\in S$. An exact closed-set search enumerates 7,549 closed sets and 446,992 extensions without finding a valid nine-vertex target. For $\Xi(C)/2=1$, exactly one exterior vertex has two selected neighbors. Translate it to $0$ and use coordinate permutations of the seven-dimensional cube to normalize those neighbors as $1,2$. Forbid the other five neighbors of $0$. This search enumerates 26 closed sets and 1,390 extensions, again without a target.
+
+Finally $\Xi(C)/2=2$ has precisely two possibilities: one exceptional exterior vertex with three selected neighbors, or two exceptional vertices each with two selected neighbors. In the first case translate the exception to $0$ and enumerate the $\binom73=35$ choices of its selected neighbors. In the second, vertex transitivity and distance transitivity of the folded cube permit the two exceptions to be represented by $0$ and one of $1,3,7$, corresponding to distances one, two, and three. For each such position, enumerate all $\binom72^2=441$ choices of their selected-neighbor pairs. In every instance, the remaining neighbors of an exceptional vertex are forbidden and the closure search proceeds exactly as above. The integer-only C++ checker \path{verification/certify_n7_xi2.cpp} and an independent standard-library Python checker \path{verification/certify_n7_xi2.py} exhaust these $35+3\cdot441=1,358$ cases and finds no target, visiting 1,721 closed states overall in these additional searches. The zero- and one-overlap cases are also certified by the standard-library Python program \path{verification/certify_n7_closure.py}. All computations consist of 64-bit masks, bit counts, and finite exhaustive recursion with the monotonicity justification given here. The output and the source code are archived with the manuscript. It follows that $\Xi(C)/2\ge3$ for every nine-pair set $C$. This lower bound is attained by the nine representative source words $8,12,19,23,40,44,51,55,56$ together with their seven-bit complements: direct integer adjacency counting gives $\Xi(C)=6$.
+
+
+Finally, if a valid 119-label protocol existed, its paired-source set would need $a\ge9$ from the initial label count. The terminal lower bound $K\ge64+6a+\Xi(C)/2$ forces $a\le9$, hence $a=9$ and $\Xi(C)/2\le1$, contrary to the certificate. Thus $K\ge120$ and the Hamming construction is optimal.
+\end{proof}
+
+\begin{corollary}[An exact all-length optimality criterion]\label{cor:v7classification}
+Let $\delta_n=h_n-\mathbf1_{\{n=7\}}$, and let $C=\bar C$ be any set of initially paired words. The canonical protocol induced by $C$ is optimal if and only if
+\begin{equation}\label{eq:v7optimality}
+ \boxed{\quad a\ge\delta_n,\qquad (n-1)a+\Xi(C)/2\le M-\delta_n.\quad}
+\end{equation}
+For $n\ge8$ write $M=nh_n+\rho_n$ with $0\le\rho_n<n$. In that regime the criterion is equivalent to either
+\[
+ a=h_n,\quad\Xi(C)/2\le\rho_n,
+\]
+or, when $\rho_n=n-1$, to $a=h_n+1$ and $\Xi(C)=0$. For the exceptional length $n=7$, every optimal source-pair set has $a=8$ and $\Xi(C)/2\le8$.
+\end{corollary}
+\begin{proof}
+Substitute the exact optimum $K=N-\delta_n$ of Theorem~\ref{thm:v7all} in both affine terms of~\eqref{eq:v5variation}; this gives~\eqref{eq:v7optimality} and proves necessity and sufficiency. For $n\ge8$, put $a=h_n+t$ with $t\ge0$ and simplify to $(n-1)t+\Xi(C)/2\le\rho_n$. As $\rho_n<n$, only $t=0$ is possible, except that $t=1$ can occur if $\rho_n=n-1$ and $\Xi(C)=0$. For $n=7$ the criterion initially permits $a=8$ or $a=9$; the exact $\Xi(C)/2\ge3$ certificate excludes $a=9$, yielding the final assertion.
+\end{proof}
+
+\begin{corollary}[Computational complexity of the unrestricted optimum]\label{cor:v7complexity}
+The unrestricted state-alphabet optimum $n\mapsto\kappa_1(n,n-2)$ is computable by exact integer arithmetic in polynomial time in the output length $n+1$. Its threshold decision problem, given $n$ and $K$ in binary, ``is $\kappa_1(n,n-2)\le K$?'', belongs to the class $\mathbf P$. This holds independently of the complexity of candidate-restricted variants of the cubical overlap problem.
+\end{corollary}
+\begin{proof}
+For $n\ge4$, formula~\eqref{eq:v7closed} uses one shift, integer division, subtraction and the test $n=7$. The numerical answer has $n$ binary digits. For the threshold language, compare the bit length of $K$ to $n$: if it is shorter than $n$, reject, and if longer than $n+1$, accept; in the remaining cases $n$ is bounded by the input size of $K$ and the exact formula is computable in polynomial time. The finite cases $n<4$ may be handled separately.
+\end{proof}
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{@{}rrrrl@{}}\toprule
+$n$ & $h_n$ & $\delta_n$ & $\kappa_1(n,n-2)$ & certificate\\\midrule
+4&2&2&14&two pairs\\
+5&3&3&29&positive-overlap construction\\
+6&5&5&59&positive-overlap construction\\
+7&9&8&120&exact closed-set certificate\\
+8&16&16&240&cubical Hamming prefix\\
+9&28&28&484&cubical Hamming prefix\\
+10&51&51&973&cubical Hamming prefix\\
+11&93&93&1955&cubical Hamming prefix\\
+12&170&170&3926&cubical Hamming prefix\\
+13&315&315&7877&two-component suffix\\
+16&2048&2048&63488&dyadic Hamming prefix\\\bottomrule
+\end{tabular}
+\caption{Exact optimal label cardinalities for one blind overwrite with $q=n-2$. All values use the closed-form theorem, with finite source-set witnesses.}\label{tab:v7all}
+\end{table}
+
+
+
+\section{The second near-maximal erasure layer}\label{sec:nextlayer}
+For this section let $n\ge7$, $T=1$, $q=n-3$, $N=2^n$. Every initial fiber has minimum distance $n-1$ and every terminal fiber minimum distance $n-2$. In this range a code in either phase contains at most two elements, by the three-word distance obstruction. Thus source doubletons form a matching $M$ of $a$ pairs with endpoint set $C$.
+\subsection{Forced-pair collisions and neighborhoods}
+For an initial pair $P=\{x,y\}$, set
+\[
+ \mathcal F(P)=\bigl\{\{U_{i,b}(x),U_{i,b}(y)\}: i\in[n],\ b\in\F\bigr\},
+ \qquad \mathcal F(M)=\bigcup_{P\in M}\mathcal F(P).
+\]
+Each admissible source pair has distance $n$ or $n-1$. Consequently $\mathcal F(P)$ has exactly $2n$ distinct edges, with terminal distance $n-1$ or $n-2$. Write $D=2na-|\mathcal F(M)|$ for repeated forced-edge occurrences. Also let $e(C)$ count the unordered edges of the ordinary hypercube with both endpoints in $C$.
+
+\begin{lemma}[Collision--adjacency inequality]\label{lem:next-collision}
+For $n\ge7$ and source matching $M$ as above,
+\[
+ \boxed{\quad D\le e(C),\qquad |\mathcal F(M)|\ge2na-e(C).\quad}
+\]
+\end{lemma}
+\begin{proof}
+First consider two disjoint source pairs $P,Q$, each of length at least $n-1$. Let $e(P,Q)$ be the number of hypercube edges between their endpoints. Each endpoint of $P$ is adjacent to at most one endpoint of $Q$, by the triangle inequality and $\dist(Q)\ge n-1>2$, so $e(P,Q)\le2$. If a terminal forced pair $\{u,v\}$ is produced by both $P$ and $Q$, the two sources must form opposite sides of two hypercube edges. To see this, the output distance is either $n-1$ or $n-2$. At distance $n-1$, the unique agreement coordinate of $u,v$ is necessarily the overwritten coordinate, and the disjoint predecessors occupy opposite vertices of the two coordinate-$i$ edges through $u$ and $v$. At distance $n-2$, the overwritten coordinate is one of the two agreement coordinates. Restoring the source distance $n-1$ changes precisely one output endpoint on that coordinate; since $P$ and $Q$ are disjoint, the two restorations must involve different endpoints, again producing two cross-pair unit edges. Hence $\mathcal F(P)\cap\mathcal F(Q)$ is empty unless $e(P,Q)=2$.
+
+In the latter case the two cross-pair unit edges have coordinates $i,j$ (possibly equal). Any common forced pair must arise by overwriting one of these coordinates. For $i=j$ there are at most two different assigned values, producing at most two common forced pairs. For $i\ne j$, each source may have at most one admissible common image at the two agreement positions (and in any event at most two). Thus
+\[
+ |\mathcal F(P)\cap\mathcal F(Q)|\le e(P,Q).
+\]
+Every forced edge can arise from at most two source pairs in the matching: its predecessors must be among four candidate edges on its one or two agreement positions, whose maximum disjoint subfamily has size two. Hence
+\[
+ D=\sum_{P<Q\in M}|\mathcal F(P)\cap\mathcal F(Q)|
+ \le\sum_{P<Q\in M}e(P,Q)\le e(C).
+\]
+The final inequality also uses that any two words inside an initial source pair are at distance at least $n-1$ and therefore do not form a hypercube edge.
+\end{proof}
+
+Write $B_1(C)=\{y\in X:\dist(y,C)\le1\}$, and for an exterior word $y\notin C$ let $d_C(y)=|\{x\in C:\dist(x,y)=1\}|$. Define
+\[
+ \Xi(C)=\sum_{y\notin C}(d_C(y)-1)_+,
+ \qquad (u)_+=\max\{u,0\}.
+\]
+No complement invariance of $C$ is assumed. A write to a paired source yields precisely the source words and all their Hamming neighbors, so the endpoint union of the forced terminal pairs is $B_1(C)$.
+
+\begin{lemma}[Exact union identity]\label{lem:union}
+For any $C\subseteq\F^n$ with $|C|=2a$,
+\[
+ \boxed{\quad |B_1(C)|=2(n+1)a-2e(C)-\Xi(C).\quad}
+\]
+\end{lemma}
+\begin{proof}
+There are $2(n+1)a$ incidences between centers $x\in C$ and points at distance at most one from $x$. Every $y\in C$ receives one incidence from itself and $\deg_C(y)$ extra incidences, totaling $2e(C)$ center repetitions. An exterior $y$ with $d_C(y)\ge1$ receives exactly $d_C(y)-1$ extra incidences. Subtracting both kinds of repetition gives the union cardinality.
+\end{proof}
+
+\section{A sharp converse and all-length optimum outside dimension seven}
+\begin{theorem}[Geometric converse]\label{thm:next-converse}
+For every $n\ge7$ and $q=n-3$,
+\[
+ \boxed{\quad \kappa_1(n,n-3)\ge N-\left\lfloor\frac{N}{2n}\right\rfloor.\quad}
+\]
+More precisely, every source matching with $a$ pairs and endpoint set $C$ requires
+\[
+ K\ge\max\left\{N-a,\ \frac N2+(n-1)a+\frac{\Xi(C)}2+e(C)-D\right\}.
+\]
+\end{theorem}
+\begin{proof}
+The initial state partition requires $N-a$ labels. Every distinct forced terminal pair needs its own terminal label, since a terminal label may contain at most two words. All $N$ current words are reachable: initialize each word and reassign an existing coordinate bit. Every word outside $B_1(C)$ must use a further label, and one terminal label can serve at most two such residual words. Therefore
+\[
+ K\ge |\mathcal F(M)|+\frac{N-|B_1(C)|}{2}
+ =\frac N2+(n-1)a+e(C)-D+\frac{\Xi(C)}2.
+\]
+By Lemma~\ref{lem:next-collision}, $e(C)-D\ge0$; also $\Xi(C)\ge0$. Thus
+\[
+ K\ge\max\bigl\{N-a,\ N/2+(n-1)a\bigr\}.
+\]
+The two affine expressions agree at $a=N/(2n)$, and their maximum is at least $N-N/(2n)$ for every real $a$. Since $K$ is integer, $K\ge N-\lfloor N/(2n)\rfloor$.
+\end{proof}
+
+
+
+
+\section{The seven-coordinate computer-assisted exclusion}\label{sec:sevenformal}
+
+The general converse at $n=7$, $q=n-3=4$ gives $K\ge119$. The antipodal length-seven Hamming construction with eight initial paired labels and $112$ singleton labels gives $K=120$. We describe the exact finite obstruction for the remaining possibility, $K\le119$, and the independently checked Boolean certificate for excluding it.
+
+\begin{lemma}[Necessary conditions for $119$ labels]\label{lem:seven-necessary}
+Let $M$ be the initial matching of $a$ pairs of Hamming distance six or seven, and let $C$ be its endpoint set. Write $D=14a-|\mathcal F(M)|$ for duplicated forced-terminal pairs, $e=e(C)$ for induced cube edges, and $\Xi=\Xi(C)$ for exterior Hamming-neighborhood overlap. Any protocol with at most $119$ labels satisfies
+\[
+ a=9,\qquad e-D+\left\lceil\frac{\Xi}{2}\right\rceil\le1.
+\]
+\end{lemma}
+\begin{proof}
+The initial phase uses at least $128-a$ labels. Every selected source pair produces $14$ forced terminal pairs and $|B_1(C)|=16a-2e-\Xi$.
+The terminal phase uses at least
+\[
+ 14a-D+\left\lceil\frac{128-|B_1(C)|}{2}\right\rceil
+ =64+6a+e-D+\left\lceil\frac\Xi2\right\rceil.
+\]
+The collision--adjacency lemma gives $D\le e$. If $K\le119$ then the first count gives $a\ge9$ and the second gives $a\le9$; substitution proves the displayed inequality.
+\end{proof}
+
+A source pair has two distinct endpoints and distance either six or seven. There are exactly $512$ eligible initial pairs. The conditions in Lemma~\ref{lem:seven-necessary} split into two alternatives: (B) $\Xi=0$, and (A) $e-D=0$ with $\Xi\le2$. In case B the cube-isometry group normalizes a first pair to one of the distance-six or antipodal representatives. In case A the neighborhood formula and $|B_1(C)|\le128$ imply $e\ge7$, so at least one strong pair collision occurs. Exhaustive pair-pair enumeration finds precisely three isometry orbits for such collisions, giving five exhaustive representative cases.
+
+\begin{table}[t]\centering\small
+\begin{tabular}{@{}lrrr@{}}\toprule
+Case & DIMACS variables & Clauses & Checked RUP additions\\\midrule
+B.antipodal & 1197 & 7080 & 801\\
+B.mixed & 10285 & 44968 & 32062\\
+A.normal & 18217 & 91673 & 4860\\
+A.special & 18217 & 91673 & 5706\\
+A.antipodal & 18217 & 91673 & 6853\\\midrule
+Total & & & 50282\\\bottomrule
+\end{tabular}
+\caption{Five propositional proof cases for the seven-coordinate exclusion. Each proof is an addition-only DRUP derivation ending in the empty clause; the exact checker validates every added clause by unit propagation.}\label{tab:certcases}
+\end{table}
+
+Each CNF uses source-pair selection variables, exact-nine and disjointness constraints, indicators for selected endpoints, and a Boolean encoding of the required external-neighborhood bounds. The five CNFs are regenerated byte-identically by the supplied source. A separate CDCL implementation generated the addition-only DRUP traces. This certificate design follows the clausal-proof verification methodology of Wetzler, Heule and Hunt~\cite{wetzler2014}; an external LRAT or independently verified checker would provide a further assurance layer~\cite{cruzfilipe2017}. The proof checker parses the original CNF, then checks every added clause using the RUP rule: assuming the negations of its literals must force a conflict under exact Boolean unit propagation. An empty clause completes each refutation. The bundled checker reports the counts in Table~\ref{tab:certcases}; truncating the proof or introducing an unjustified clause is rejected. The cardinality gates were subjected to $2{,}046$ truth-table and unit-propagation tests.
+
+\begin{theorem}[Seven-coordinate optimum; computer-assisted component]\label{thm:seven-computer}
+In the deterministic one-write model with public phase and four erasures,
+\[
+\boxed{\kappa_1(7,4)=120.}
+\]
+The lower bound uses the exhaustive five-case reduction and its separately checked finite DRUP certificates.
+\end{theorem}
+\begin{proof}
+Any $119$-label protocol implies a satisfying assignment in one of the five finite encodings. All five are refuted by the supplied DRUP traces. Conversely take the eight antipodal source pairs with seven-bit representatives
+\[
+ 0,\ 7,\ 25,\ 30,\ 42,\ 45,\ 51,\ 52.
+\]
+They give eight initial paired labels and $112$ singleton labels. Their $112$ distinct forced terminal pairs cover the full cube. The decoding and transition verifier checks every initial word, every one-write event, and every erasure mask of size at most four. This gives a valid protocol on $120$ labels.
+\end{proof}
+
+By monotonicity of the admissible zero-error protocols in the erasure budget,
+\[
+\kappa_1(7,5)\ge\kappa_1(7,4)=120.
+\]
+The same $120$-label protocol corrects five erased coordinates because its phase-zero non-singleton fibers are antipodal and its terminal pairs have distance six. Consequently $\kappa_1(7,5)=120$ as well. This implication permits the seven-coordinate proof of the stronger four-erasure problem to serve as the main finite certificate for both near-maximal erasure levels. The independent folded-cube closure enumeration retained in the supplement separately supports the structural claim $\Xi(C)\ge6$ for complement-invariant 18-point configurations.
+
+\paragraph{Trust boundary.} The DRUP checker proves UNSAT for the five concrete DIMACS files. The source-to-CNF correspondence, the orbit completeness argument, and the collision--adjacency lemma are mathematical and source-level claims that require review on their own terms. The result is a reproducible computer-assisted finite theorem, without a Lean or Coq formalization of the entire reduction.
+
+
+
+\section{Unified optimality and the erasure plateau}\label{sec:unified}
+\begin{theorem}[Two adjacent erasure levels have the same optimal alphabet]\label{thm:plateau}
+For every integer $n\ge7$ and either $q=n-3$ or $q=n-2$,
+\begin{equation}\label{eq:plateau}
+\boxed{\quad
+\kappa_1(n,q)=2^n-\left\lfloor\frac{2^{n-1}}n\right\rfloor+\mathbf1_{\{n=7\}}.
+\quad}
+\end{equation}
+For all $n\ge8$ the optimal value is supported by an analytic converse and explicit Hamming-prefix cubical constructions. The exceptional length $n=7$ uses the finite computer-assisted theorem in Section~\ref{sec:sevenformal}. The minimum bit budget remains $n$ in both levels.
+\end{theorem}
+\begin{proof}
+For $n\ge8$, Theorem~\ref{thm:next-converse} gives the same universal lower bound at $q=n-3$ as Theorem~\ref{thm:v4-converse} gives at $q=n-2$. Lemma~\ref{lem:v7packing} and the variational construction supply a protocol with $N-\lfloor2^{n-1}/n\rfloor$ labels and even recover $n-2$ erasures. Hence it is valid at both levels. At $n=7$, Theorem~\ref{thm:seven-computer} gives $\kappa_1(7,4)=120$. The same explicit protocol corrects five erasures, and monotonicity gives $\kappa_1(7,5)\ge120$. Thus both values equal $120$. In all cases $2^{n-1}<\kappa_1(n,q)\le2^n$, so rounding the logarithm gives $n$ bits.
+\end{proof}
+
+For $q\ge n-1$ the initial collision restriction makes the encoder injective, so $\kappa_1(n,q)=2^n$. Thus the integer-label plateau in Theorem~\ref{thm:plateau} is immediately adjacent to full-alphabet saturation. It is invisible when measuring only the rounded bit budget.
+
+\begin{table}[ht]\centering\small
+\begin{tabular}{@{}rrrrrr@{}}\toprule
+$n$ & $\lfloor2^{n-1}/n\rfloor$ & $\kappa_1(n,n-2)$ & $\kappa_1(n,n-3)$ & Bits & Method\\\midrule
+7&9&120&120&7&Five DRUP cases\\
+8&16&240&240&8&Prefix cubes\\
+9&28&484&484&9&Prefix cubes\\
+10&51&973&973&10&Prefix cubes\\
+11&93&1955&1955&11&Prefix cubes\\
+12&170&3926&3926&12&Prefix cubes\\
+13&315&7877&7877&13&Special suffix union\\
+16&2048&63488&63488&16&Dyadic extremizer\\\bottomrule
+\end{tabular}
+\caption{The exact one-write alphabet plateau. For $n=4,5,6$ the $n-2$ layer is known but the plateau theorem does not assert the same values at $n-3$.}\label{tab:mergedvalues}
+\end{table}
+
+
+
+\section{Research positioning and resource accounting}
+The static erasure-recovery problem assigns the same label to words of Hamming distance at least $q+1$, and its alphabet minimum is the chromatic number of the $q$th power of the binary Hamming graph, following the characteristic-graph viewpoint of Witsenhausen~\cite{witsenhausen1976}. The online constraint is stronger: initial color classes must admit consistent successors under every possible overwrite. In our setting a transition sees the stored label and the assigned coordinate and new bit, but has no access to the overwritten bit or an uncharged log. This differs from the communication cost for updating stale distributed storage nodes~\cite{nakkiran2014}, and from codeword-symbol repair/locality objectives in locally repairable codes~\cite{zhang2024}. Exact chromatic-number computations for Hamming graph powers~\cite{kokkala2017} concern a static problem and illuminate why one should not extrapolate a special one-write closed form to unrestricted horizons.
+
+The two costs $\kappa_1$ and $R_1^{\rm on}$ must be distinguished throughout. In particular, the two near-maximal erasure levels require $n$ binary memory places despite a strict reduction in the number of distinct labels. The integer cardinality result therefore measures a fine-grained state-space saving inside a single bit-complexity plateau. Whether the exact saving itself translates into a practical implementation advantage depends on representation and indexing overhead; explicit schemes can rank states without storing a lookup table of exponential size when the structure admits a succinct representation. We do not claim measured systems throughput or energy savings.
+
+The new exact value computation for $T=1$, $q\in\{n-3,n-2\}$ is polynomial time in the length of the output written explicitly in binary, and the associated threshold comparison can use bit-length short circuits. This does not classify the complexity of optimizing the alphabet for arbitrary user-supplied $(n,T,q)$, nor prove that a candidate-restricted geometric optimization has the same complexity as the unrestricted one.
+
+\section{Reproduction and limitations}\label{sec:reproduction}
+The source package includes the fully specified analytic construction and enumerators from the V7 and V10 line of results, the V9 matching reduction, and the five concrete CNF/DRUP pairs from V12. The canonical command for the finite certified case is \texttt{bash verify\_all.sh} inside the V12 certificate folder. That command verifies SHA-256 hashes, tests exact-cardinality constraints, regenerates five CNFs byte-for-byte, checks all five proof traces, checks the seven-cube geometry and a $120$-label witness, and tests rejection of damaged proofs. The whole-paper analytic proofs are written out in the main text; finite testing alone is not treated as a proof of their general quantifiers.
+
+This manuscript is a research draft with independently reproducible finite certificates; it has not undergone external peer review. External refereeing should address a fresh review of the Hamming-prefix packing lemma (including the exceptional $n=13$ construction), the collision--adjacency inequality for the $n-3$ layer, and the combinatorial-to-CNF implications in the seven-dimensional finite argument. A second proof checker would further narrow the trust boundary. Originality should also be tested against the newest literature in zero-error dynamic coding and constrained graph colorings; the references cited here verify related resource formulations but do not by themselves establish priority.
+
+\section{Conclusions}
+A single blind overwrite creates constraints on the compatibility of initial state labels and their successors. At maximal nontrivial erasure budget the exact state alphabet admits a finite variational formula over antipodal source subsets. A geometric converse and Hamming-prefix constructions determine its optimum at all blocklengths. The next erasure level has the same closed-form optimum for all $n\ge7$; the seven-coordinate exception is supported by a constructive protocol and independently checkable propositional proof traces. The matching normal form supplies a wider exact optimization framework in the high-erasure regime. The distinction between an integer state alphabet and the rounded bit budget is essential to the resulting plateau phenomenon.
+
+
+\begin{thebibliography}{99}\small
+\bibitem{witsenhausen1976} H. S. Witsenhausen, ``The zero-error side information problem and chromatic numbers,'' \emph{IEEE Transactions on Information Theory}, 22(5):592--593, 1976. DOI: 10.1109/TIT.1976.1055607.
+\bibitem{hamming1950} R. W. Hamming, ``Error detecting and error correcting codes,'' \emph{Bell System Technical Journal}, 29(2):147--160, 1950. DOI: 10.1002/j.1538-7305.1950.tb00463.x.
+\bibitem{nakkiran2014} P. Nakkiran, N. B. Shah, and K. V. Rashmi, ``Fundamental limits on communication for oblivious updates in storage networks,'' \emph{IEEE GLOBECOM}, 2014. arXiv:1409.1666.
+\bibitem{kokkala2017} J. I. Kokkala and P. R. J. Oestergard, ``The chromatic number of the square of the 8-cube,'' \emph{Mathematics of Computation}, 87(313):2551--2561, 2018. DOI: 10.1090/mcom/3291.
+\bibitem{zhang2024} W. Zhang, D. Tang, C. Ying, and Y. Luo, ``Constructions of optimal binary locally repairable codes via intersection subspaces,'' \emph{SCIENCE CHINA Information Sciences}, 67, 162306, 2024. DOI: 10.1007/s11432-023-3863-y.
+\bibitem{macwilliams1977} F. J. MacWilliams and N. J. A. Sloane, \emph{The Theory of Error-Correcting Codes}, North-Holland, 1977.
+\bibitem{wetzler2014} N. Wetzler, M. J. H. Heule, and W. A. Hunt Jr., ``DRAT-trim: Efficient Checking and Trimming Using Expressive Clausal Proofs,'' \emph{SAT 2014}, LNCS 8561, pp. 422--429, DOI: 10.1007/978-3-319-09284-3\_31.
+\bibitem{cruzfilipe2017} L. Cruz-Filipe, M. J. H. Heule, W. A. Hunt, M. Kaufmann, and P. Schneider-Kamp, ``Efficient Certified RAT Verification,'' \emph{CADE/ITP related certified verification research}, arXiv:1612.02353.
+\end{thebibliography}
+\end{document}
