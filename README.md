@@ -1,29 +1,27 @@
-# Zero-Error Online Memory under Blind Overwrites
+# Zero-Error Online Memory
 
 Zinan Wang
 
-## Article
+## Current Paper A — V13 (12 October 2026)
 
-`paper.pdf` is the typeset article. `paper.tex` contains the complete LaTeX source; `figures/` contains its vector illustrations. The bibliography is embedded in the source.
+**Exact State Alphabets for Blind One-Write Memory: An Erasure Plateau, Sharp Cubical Constructions, and Verified Finite Obstructions**
 
-## Reproduce the finite checks
+- [Read the canonical 21-page V13 PDF](paper_a_integrated/paper.pdf)
+- [Editable V13 LaTeX manuscript](paper_a_integrated/paper.tex)
+- [Paper A current README and reproduction instructions](paper_a_integrated/README.md)
+- [Complete reproducibility archive as 13 Git-tracked parts](paper_a_integrated/archive_parts/)
+- [Independent Q7 exception and V10/V12 verification scripts](paper_a_integrated/verification/)
+- [Evidence ledger and limitations](paper_a_integrated/V13_VERIFICATION_STATUS.md)
 
-Python 3.10 or later is required. All programs use the Python standard library.
-
-```bash
-python verify_manifest.py
-python run_all.py --full
-```
-
-The full suite checks the exact fourteen-state four-coordinate protocol, first-phase state-support incidence, the simplex family, deterministic column completion, general bounds, multiround pair counting, finite classifications, and syndrome-atom compatibility graphs. See `REPRODUCIBILITY.md` for the named checks.
-
-## Compile the article
+For a local clone:
 
 ```bash
-pdflatex -interaction=nonstopmode -halt-on-error paper.tex
-pdflatex -interaction=nonstopmode -halt-on-error paper.tex
+bash paper_a_integrated/REBUILD_V13_ARCHIVE.sh --extract
+cd paper_a_integrated/PaperA_V13
+bash RUN_QUICK.sh
+bash RUN_ALL.sh
 ```
 
-The state model uses a public phase index and charges every persistent state label. Erasure recovery is required at each phase; update transitions receive the current label and coordinate assignment.
+The compiled PDF and frozen V13 proof package are preserved in Git. Historical source `paper.tex` at the repository root is an earlier, broader manuscript concerning multiple online-memory results, retained for research provenance. The V13 paper replaces the older integrated Paper A under `paper_a_integrated`; unrelated historical results and branches remain intact.
 
-The exact fourteen-state optimum for (n,T,q)=(4,1,2) is proved in the article and verified in `verification/verify_n4_14_states.py`.
+The theorem concerns the *cardinality* of the persistent state alphabet under one blind coordinate assignment and up to q erased coordinates with public phase. The minimum binary bit budget remains n in both high-erasure layers. Finite DRUP certificates establish UNSAT of their encoded propositions; the analytic proofs and source-to-CNF reduction are separate review obligations.
